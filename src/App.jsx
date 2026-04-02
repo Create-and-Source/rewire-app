@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin','sos'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin','sos','coach'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -505,6 +505,7 @@ export default function App() {
             {page === 'surrender' && <GiveToGodPage onBack={() => setPage('more')} />}
             {page === 'checkin' && <CheckInPage onBack={() => setPage('more')} />}
             {page === 'sos' && <SOSPage onBack={() => setPage('home')} />}
+            {page === 'coach' && <CoachPage onBack={() => setPage('home')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -637,6 +638,7 @@ function HomePage({ time, quote, setPage }) {
         <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
+            { id: 'coach', icon: '✦', label: 'Coach' },
             { id: 'checkin', icon: '☀️', label: 'Check-in' },
             { id: 'surrender', icon: '🙏', label: 'Give to God' },
             { id: 'energy', icon: '⚡', label: 'Energy' },
@@ -3663,6 +3665,186 @@ function SOSPage({ onBack }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ============================================================
+// AI COACH (Gemini)
+// ============================================================
+
+const GEMINI_KEY = 'AIzaSyD3f2iz6WekBxXPv7SKVZ82I_AjrG0It0o'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
+
+const COACH_SYSTEM = `You are REWIRE Coach — a warm, wise, deeply supportive AI recovery companion for someone who quit smoking weed on April 1, 2026 at 6:45 PM.
+
+Your personality:
+- You speak like a loving, grounded mentor — not clinical, not preachy
+- You're deeply familiar with Neville Goddard's teachings: "feeling is the secret", "live in the end", "assume the feeling of the wish fulfilled", the I AM, the law of assumption
+- You also draw from Bob Proctor and Wayne Dyer when relevant
+- You understand the neuroscience of cannabis withdrawal: dopamine recalibration, REM rebound, CB1 receptor upregulation, neuroplasticity
+- You're honest about the hard parts but always point toward the light
+- You keep responses concise — 2-4 sentences usually, unless they're asking for depth
+- You never judge. You never lecture. You meet them where they are.
+- If they're struggling, you validate first, then redirect gently
+- If they're doing well, you celebrate genuinely
+- You use "you" not "we" — this is their journey
+- You can reference their quit date to calculate how far they've come
+
+Key context:
+- They quit weed on April 1, 2026 at 6:45 PM
+- They're tracking energy, sleep, cravings, gratitude, dreams, water, food, and more
+- They believe in Neville Goddard's teachings deeply
+- They want to start running and get healthy
+- Low energy is a big concern for them right now
+- They use a "Give It to God" practice to release worries
+
+Never say you're an AI or mention being a language model. You are their coach. Be real.`
+
+function CoachPage({ onBack }) {
+  const [messages, setMessages] = useState(load('coach_messages', []))
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const mic = useSpeech(setInput)
+  const bottomRef = useRef(null)
+  const daysSinceQuit = Math.floor((Date.now() - QUIT_DATE.getTime()) / 86400000)
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const send = async () => {
+    if (!input.trim() || loading) return
+    mic.stop()
+    const userMsg = { role: 'user', text: input.trim(), time: Date.now() }
+    const updated = [...messages, userMsg]
+    setMessages(updated)
+    save('coach_messages', updated)
+    setInput('')
+    setLoading(true)
+
+    try {
+      // Build conversation history for Gemini
+      const contents = [
+        { role: 'user', parts: [{ text: COACH_SYSTEM + '\n\nThe user is on Day ' + daysSinceQuit + ' of their recovery. Current time: ' + new Date().toLocaleString() }] },
+        { role: 'model', parts: [{ text: 'I understand. I\'m here as their recovery coach, grounded in Neville Goddard\'s teachings and neuroscience. Ready to support them.' }] },
+        ...updated.map(m => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.text }]
+        }))
+      ]
+
+      const res = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: 300, temperature: 0.8 } })
+      })
+
+      const data = await res.json()
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'I\'m here with you. Tell me more about what you\'re feeling.'
+
+      const coachMsg = { role: 'coach', text: reply, time: Date.now() }
+      const final = [...updated, coachMsg]
+      setMessages(final)
+      save('coach_messages', final)
+    } catch (err) {
+      const errMsg = { role: 'coach', text: 'I\'m having trouble connecting right now. But I\'m still here — try again in a moment.', time: Date.now() }
+      const final = [...updated, errMsg]
+      setMessages(final)
+      save('coach_messages', final)
+    }
+
+    setLoading(false)
+  }
+
+  const clearChat = () => {
+    if (!confirm('Clear all messages and start fresh?')) return
+    setMessages([])
+    save('coach_messages', [])
+  }
+
+  return (
+    <div style={{ ...s.page, display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingBottom: 0 }}>
+      <div style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16 }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+          </button>
+          {messages.length > 0 && (
+            <button onClick={clearChat} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.15)' }}>Clear</button>
+          )}
+        </div>
+        <div style={{ paddingTop: 8, marginBottom: 16 }}>
+          <h1 style={s.greeting}>Coach</h1>
+          <p style={s.subtitle}>Your recovery companion — powered by Neville</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 16 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <span style={{ fontSize: 40 }}>✦</span>
+            <p style={{ fontSize: 17, color: '#fff', marginTop: 16 }}>Hey. I'm here.</p>
+            <p style={{ fontSize: 14, ...s.dim, marginTop: 10, lineHeight: 1.7 }}>
+              Tell me how you're feeling, what you're struggling with, or what you need right now.
+              I know Neville's teachings, I understand what your brain is going through, and I'm not going anywhere.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 }}>
+              {['I\'m having a craving', 'I can\'t sleep', 'I have no energy', 'I\'m feeling anxious', 'Tell me about day ' + daysSinceQuit].map(q => (
+                <button key={q} onClick={() => { setInput(q) }}
+                  style={{ ...s.pill, fontSize: 13, padding: '10px 16px' }}>{q}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {messages.map((m, i) => (
+          <div key={i} style={{ marginBottom: 12, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+            <div style={{
+              maxWidth: '85%', padding: '14px 18px', borderRadius: 16,
+              background: m.role === 'user' ? 'rgba(255,255,255,0.1)' : '#1A1A1A',
+              border: m.role === 'user' ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
+              borderBottomRightRadius: m.role === 'user' ? 4 : 16,
+              borderBottomLeftRadius: m.role === 'user' ? 16 : 4,
+            }}>
+              <p style={{ fontSize: 15, color: m.role === 'user' ? '#fff' : 'rgba(255,255,255,0.7)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                {m.text}
+              </p>
+              <p style={{ fontSize: 10, ...s.dim, marginTop: 6, textAlign: m.role === 'user' ? 'right' : 'left' }}>
+                {new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
+            <div style={{ padding: '14px 18px', borderRadius: 16, background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)', borderBottomLeftRadius: 4 }}>
+              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>thinking...</span>
+              </motion.div>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ flexShrink: 0, padding: '12px 0 max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && send()}
+            placeholder="Talk to your coach..."
+            style={{ ...s.input, flex: 1 }} />
+          <button onClick={send} disabled={!input.trim() || loading}
+            style={{ ...s.btnSecondary, padding: '14px 20px', opacity: input.trim() && !loading ? 1 : 0.3, flexShrink: 0 }}>
+            {Icons.send}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
