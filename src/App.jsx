@@ -3705,9 +3705,25 @@ function CoachPage({ onBack }) {
   const [messages, setMessages] = useState(load('coach_messages', []))
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const mic = useSpeech(setInput)
+  const [speaking, setSpeaking] = useState(false)
+  const spokenRef = useRef(false)
+  const mic = useSpeech((t) => { setInput(t); spokenRef.current = true })
   const bottomRef = useRef(null)
   const daysSinceQuit = Math.floor((Date.now() - QUIT_DATE.getTime()) / 86400000)
+
+  const speak = (text) => {
+    if (!('speechSynthesis' in window)) return
+    window.speechSynthesis.cancel()
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.rate = 0.95
+    utter.pitch = 1
+    utter.onstart = () => setSpeaking(true)
+    utter.onend = () => setSpeaking(false)
+    utter.onerror = () => setSpeaking(false)
+    window.speechSynthesis.speak(utter)
+  }
+
+  const stopSpeaking = () => { window.speechSynthesis?.cancel(); setSpeaking(false) }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -3715,7 +3731,10 @@ function CoachPage({ onBack }) {
 
   const send = async () => {
     if (!input.trim() || loading) return
+    const wasSpoken = spokenRef.current
+    spokenRef.current = false
     mic.stop()
+    stopSpeaking()
     const userMsg = { role: 'user', text: input.trim(), time: Date.now() }
     const updated = [...messages, userMsg]
     setMessages(updated)
@@ -3724,7 +3743,6 @@ function CoachPage({ onBack }) {
     setLoading(true)
 
     try {
-      // Build conversation history for Gemini
       const contents = [
         { role: 'user', parts: [{ text: COACH_SYSTEM + '\n\nThe user is on Day ' + daysSinceQuit + ' of their recovery. Current time: ' + new Date().toLocaleString() }] },
         { role: 'model', parts: [{ text: 'I understand. I\'m here as their recovery coach, grounded in Neville Goddard\'s teachings and neuroscience. Ready to support them.' }] },
@@ -3747,6 +3765,9 @@ function CoachPage({ onBack }) {
       const final = [...updated, coachMsg]
       setMessages(final)
       save('coach_messages', final)
+
+      // Only speak back if user used voice
+      if (wasSpoken) speak(reply)
     } catch (err) {
       const errMsg = { role: 'coach', text: 'I\'m having trouble connecting right now. But I\'m still here — try again in a moment.', time: Date.now() }
       const final = [...updated, errMsg]
@@ -3757,8 +3778,12 @@ function CoachPage({ onBack }) {
     setLoading(false)
   }
 
+  // Stop speaking on unmount
+  useEffect(() => () => { window.speechSynthesis?.cancel() }, [])
+
   const clearChat = () => {
     if (!confirm('Clear all messages and start fresh?')) return
+    stopSpeaking()
     setMessages([])
     save('coach_messages', [])
   }
@@ -3831,11 +3856,23 @@ function CoachPage({ onBack }) {
         <div ref={bottomRef} />
       </div>
 
+      {/* Speaking indicator */}
+      {speaking && (
+        <button onClick={stopSpeaking}
+          style={{ flexShrink: 0, width: '100%', padding: '10px', background: 'rgba(255,255,255,0.04)',
+            border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }}
+            style={{ fontSize: 14 }}>{Icons.volume}</motion.span>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Speaking... tap to stop</span>
+        </button>
+      )}
+
       {/* Input */}
       <div style={{ flexShrink: 0, padding: '12px 0 max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
-          <input value={input} onChange={e => setInput(e.target.value)}
+          <MicBtn listening={mic.listening} onPress={() => { stopSpeaking(); mic.toggle(input) }} />
+          <input value={input} onChange={e => { setInput(e.target.value); spokenRef.current = false }}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Talk to your coach..."
             style={{ ...s.input, flex: 1 }} />
