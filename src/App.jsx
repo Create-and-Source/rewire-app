@@ -215,6 +215,7 @@ const Icons = {
   volume: <Icon d={[<polygon key="1" points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />, <path key="2" d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />]} />,
   mute: <Icon d={[<polygon key="1" points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />, <line key="2" x1="23" y1="9" x2="17" y2="15" />, <line key="3" x1="17" y1="9" x2="23" y2="15" />]} />,
   music: <Icon d={[<path key="1" d="M9 18V5l12-2v13" />, <circle key="2" cx="6" cy="18" r="3" />, <circle key="3" cx="18" cy="16" r="3" />]} />,
+  star: <Icon d={<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />} />,
 }
 
 // ============================================================
@@ -236,7 +237,7 @@ export default function App() {
 
   const tabs = [
     { id: 'home', icon: Icons.home, label: 'Home' },
-    { id: 'dreams', icon: Icons.moon, label: 'Dreams' },
+    { id: 'sats', icon: Icons.star, label: 'SATS' },
     { id: 'nourish', icon: Icons.salad, label: 'Nourish' },
     { id: 'work', icon: Icons.timer, label: 'Focus' },
     { id: 'more', icon: Icons.plus, label: 'More' },
@@ -264,7 +265,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -277,8 +278,9 @@ export default function App() {
         <AnimatePresence mode="wait">
           <motion.div key={page} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             {page === 'home' && <HomePage time={time} quote={quote} setPage={setPage} />}
+            {page === 'sats' && <SATSPage />}
             {page === 'brain' && <BrainPage time={time} onBack={() => setPage('more')} />}
-            {page === 'dreams' && <DreamsPage />}
+            {page === 'dreams' && <DreamsPage onBack={() => setPage('more')} />}
             {page === 'nourish' && <NutritionPage />}
             {page === 'work' && <WorkTimerPage />}
             {page === 'cravings' && <CravingsPage onBack={() => setPage('more')} />}
@@ -463,10 +465,221 @@ function BrainPage({ time, onBack }) {
 }
 
 // ============================================================
+// SATS — Nighttime Manifestation Practice
+// ============================================================
+
+function SATSPage() {
+  const [scenes, setScenes] = useState(load('sats_scenes', []))
+  const [input, setInput] = useState('')
+  const [recording, setRecording] = useState(false)
+  const [nightMode, setNightMode] = useState(false)
+  const [soundOn, setSoundOn] = useState(false)
+  const [selectedSound, setSelectedSound] = useState(TIMER_SOUNDS[0])
+  const recRef = useRef(null)
+
+  const startRec = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Speech recognition not supported'); return }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    recRef.current = new SR(); recRef.current.continuous = true; recRef.current.interimResults = true
+    recRef.current.onresult = (ev) => { let t = ''; for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript; setInput(t) }
+    recRef.current.start(); setRecording(true)
+  }
+
+  const stopRec = () => { recRef.current?.stop(); setRecording(false) }
+
+  const saveScene = () => {
+    if (!input.trim()) return
+    const scene = { id: Date.now(), text: input, date: new Date().toISOString(), type: recording ? 'spoken' : 'written' }
+    const u = [scene, ...scenes]; setScenes(u); save('sats_scenes', u); setInput('')
+    if (recording) stopRec()
+  }
+
+  const delScene = (id) => {
+    if (!confirm('Are you sure you want to delete this scene?')) return
+    const u = scenes.filter(x => x.id !== id); setScenes(u); save('sats_scenes', u)
+  }
+
+  const enterNight = () => {
+    setNightMode(true)
+    if (soundOn) ambient.start(selectedSound.freq)
+  }
+
+  const exitNight = () => {
+    setNightMode(false)
+    ambient.stop()
+  }
+
+  useEffect(() => { return () => ambient.stop() }, [])
+
+  // Night mode — full immersive dark screen
+  if (nightMode) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#050507', display: 'flex', flexDirection: 'column', position: 'fixed', inset: 0, zIndex: 200, padding: '0 20px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 430, margin: '0 auto', width: '100%' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <span style={{ fontSize: 24, color: 'rgba(255,255,255,0.1)' }}>✦</span>
+            <p style={{ fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.25)', lineHeight: 1.8, marginTop: 16, fontStyle: 'italic' }}>
+              Close your eyes. Create a short scene that implies your wish is fulfilled. Feel yourself in it. Loop it. The feeling is the secret.
+            </p>
+          </div>
+
+          <textarea value={input} onChange={e => setInput(e.target.value)}
+            placeholder="Speak or write your scene here... present tense, as if it's already real..."
+            rows={6}
+            style={{ ...s.textarea, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', fontSize: 15, lineHeight: 1.8, marginBottom: 20, color: 'rgba(255,255,255,0.6)' }}
+          />
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 24 }}>
+            <button onClick={recording ? stopRec : startRec}
+              style={{ ...s.btnSecondary, padding: '12px 20px', ...(recording ? { background: 'rgba(255,100,100,0.1)', borderColor: 'rgba(255,100,100,0.2)' } : {}) }}>
+              {recording ? 'Stop' : 'Speak It'}
+            </button>
+            {input.trim() && (
+              <button onClick={saveScene} style={{ ...s.btnSecondary, padding: '12px 20px' }}>Save Scene</button>
+            )}
+          </div>
+
+          {/* Sound controls */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 20 }}>
+            {TIMER_SOUNDS.map(snd => (
+              <button key={snd.id} onClick={() => { setSelectedSound(snd); if (soundOn) { ambient.stop(); ambient.start(snd.freq) } }}
+                style={{ padding: '6px 12px', borderRadius: 999, fontSize: 10, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
+                  background: selectedSound.id === snd.id && soundOn ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  border: selectedSound.id === snd.id && soundOn ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.04)',
+                  color: 'rgba(255,255,255,0.3)' }}>
+                {snd.name}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+            <button onClick={() => { setSoundOn(!soundOn); if (!soundOn) ambient.start(selectedSound.freq); else ambient.stop() }}
+              style={{ ...s.btnSecondary, padding: '8px 16px', fontSize: 11, opacity: 0.5 }}>
+              {soundOn ? 'Sound On' : 'Sound Off'}
+            </button>
+          </div>
+
+          {/* Recent scenes in night mode */}
+          {scenes.length > 0 && (
+            <div style={{ marginTop: 32 }}>
+              <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.15)', marginBottom: 12, textAlign: 'center' }}>RECENT SCENES</div>
+              {scenes.slice(0, 3).map(sc => (
+                <div key={sc.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', lineHeight: 1.6 }}>"{sc.text.slice(0, 120)}{sc.text.length > 120 ? '...' : ''}"</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Exit button */}
+        <button onClick={exitNight}
+          style={{ position: 'fixed', top: 16, right: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 999, padding: '8px 16px', fontSize: 11, color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>
+          Exit
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={s.page}>
+      <div style={{ paddingTop: 20, marginBottom: 24 }}>
+        <h1 style={s.greeting}>SATS</h1>
+        <p style={s.subtitle}>State Akin To Sleep — your nightly practice</p>
+      </div>
+
+      {/* Enter night mode */}
+      <button onClick={enterNight}
+        style={{ ...s.card, width: '100%', textAlign: 'center', cursor: 'pointer', padding: '32px 16px', marginBottom: 14,
+          background: '#0a0a0e', border: '1px solid rgba(255,255,255,0.06)', transition: 'all 0.2s' }}>
+        <span style={{ fontSize: 28, display: 'block', marginBottom: 10 }}>✦</span>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 6 }}>Begin Nighttime Practice</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>
+          Full screen, dimmed, with ambient sound. Write or speak your scene as you drift to sleep.
+        </div>
+      </button>
+
+      {/* Neville teaching */}
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px 16px' }}>
+        <div style={{ ...s.label, marginBottom: 10 }}>THE TECHNIQUE</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+          <p style={{ marginBottom: 10 }}>
+            <strong style={{ color: 'rgba(255,255,255,0.7)' }}>1. Relax.</strong> Lie down. Let your body get heavy. Reach that drowsy state between waking and sleeping.
+          </p>
+          <p style={{ marginBottom: 10 }}>
+            <strong style={{ color: 'rgba(255,255,255,0.7)' }}>2. Create a scene.</strong> One short scene — 10 seconds — that implies your wish is already fulfilled.
+            A handshake, a conversation, looking at something, hearing specific words.
+          </p>
+          <p style={{ marginBottom: 10 }}>
+            <strong style={{ color: 'rgba(255,255,255,0.7)' }}>3. Loop it.</strong> Replay the scene over and over. Feel yourself IN it, not watching it.
+            Feel the texture, the temperature, the emotion.
+          </p>
+          <p>
+            <strong style={{ color: 'rgba(255,255,255,0.7)' }}>4. Feel it real.</strong> The feeling is the secret. Not the words. Not the images.
+            The <em>feeling</em> of already having it. Fall asleep in that feeling.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick write (non-night mode) */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={{ ...s.label, marginBottom: 10 }}>WRITE YOUR SCENE</div>
+        <textarea value={input} onChange={e => setInput(e.target.value)} rows={4}
+          placeholder="Describe your scene in present tense... what do you see, hear, feel?"
+          style={s.textarea} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+          <button onClick={recording ? stopRec : startRec}
+            style={{ ...s.btnSecondary, ...(recording ? { background: 'rgba(255,100,100,0.1)', borderColor: 'rgba(255,100,100,0.2)' } : {}) }}>
+            {recording ? 'Stop' : 'Speak It'}
+          </button>
+          <button onClick={saveScene} style={s.btnSecondary}>Save Scene</button>
+        </div>
+      </div>
+
+      {/* Neville quotes specific to SATS */}
+      <div style={{ ...s.card, marginBottom: 14, textAlign: 'center', padding: '20px 16px', borderLeft: '2px solid rgba(255,255,255,0.1)', borderRadius: '0 14px 14px 0' }}>
+        <p style={{ fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, fontStyle: 'italic' }}>
+          "Sleep, the gateway to the subconscious, is the most favorable time to impress the subconscious with your desires."
+        </p>
+        <p style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', ...s.dim, marginTop: 10 }}>Neville Goddard</p>
+      </div>
+
+      {/* Saved scenes */}
+      {scenes.length > 0 && (
+        <>
+          <div style={s.label}>YOUR SCENES</div>
+          {scenes.map(sc => (
+            <div key={sc.id} style={{ ...s.card, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, ...s.dim }}>{sc.type === 'spoken' ? '🎙' : '✎'}</span>
+                  <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(sc.date)} · {fmtTime(sc.date)}</span>
+                </div>
+                <button onClick={() => delScene(sc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.1)' }}>{Icons.trash}</button>
+              </div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontStyle: 'italic' }}>"{sc.text}"</div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {!scenes.length && (
+        <div style={{ textAlign: 'center', padding: '40px 0', ...s.dim }}>
+          <p style={{ fontSize: 13 }}>No scenes saved yet</p>
+          <p style={{ fontSize: 11, marginTop: 6, opacity: 0.6 }}>Write your first scene and practice it tonight</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 // DREAMS
 // ============================================================
 
-function DreamsPage() {
+function DreamsPage({ onBack }) {
   const [dreams, setDreams] = useState(load('dreams', []))
   const [input, setInput] = useState('')
   const [chatMode, setChatMode] = useState(false)
@@ -499,7 +712,10 @@ function DreamsPage() {
 
   return (
     <div style={s.page}>
-      <div style={{ paddingTop: 20, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 style={s.greeting}>Dream journal</h1>
           <p style={s.subtitle}>Your brain is learning to dream again</p>
@@ -662,6 +878,7 @@ function NutritionPage() {
 
 function MorePage({ setPage }) {
   const items = [
+    { id: 'dreams', label: 'Dream Journal', sub: 'Your brain is learning to dream again' },
     { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
     { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
     { id: 'gratitude', label: 'Gratitude Journal', sub: 'Rewire toward abundance' },
