@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin','sos','coach'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin','sos','coach','revision','iam','ladder','mentaldiet','goalcard','paradigm','terror','intention','wishes','certainway','increase','rampage'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -506,6 +506,18 @@ export default function App() {
             {page === 'checkin' && <CheckInPage onBack={() => setPage('more')} />}
             {page === 'sos' && <SOSPage onBack={() => setPage('home')} />}
             {page === 'coach' && <CoachPage onBack={() => setPage('home')} />}
+            {page === 'revision' && <RevisionPage onBack={() => setPage('more')} />}
+            {page === 'iam' && <IAMPage onBack={() => setPage('more')} />}
+            {page === 'ladder' && <LadderPage onBack={() => setPage('more')} />}
+            {page === 'mentaldiet' && <MentalDietPage onBack={() => setPage('more')} />}
+            {page === 'goalcard' && <GoalCardPage onBack={() => setPage('more')} />}
+            {page === 'paradigm' && <ParadigmPage onBack={() => setPage('more')} />}
+            {page === 'terror' && <TerrorBarrierPage onBack={() => setPage('more')} />}
+            {page === 'intention' && <IntentionPage onBack={() => setPage('more')} />}
+            {page === 'wishes' && <WishesFulfilledPage onBack={() => setPage('more')} />}
+            {page === 'certainway' && <CertainWayPage onBack={() => setPage('more')} />}
+            {page === 'increase' && <IncreasePage onBack={() => setPage('more')} />}
+            {page === 'rampage' && <GratitudeRampagePage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -537,31 +549,84 @@ function HomePage({ time, quote, setPage }) {
     setJustResisted(true); setTimeout(() => setJustResisted(false), 2000)
   }
 
+  const hour = new Date().getHours()
+  const timeOfDay = hour < 5 ? 'night' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 21 ? 'evening' : 'night'
+
   const getGreeting = () => {
-    const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 17) return 'Good afternoon'
-    return 'Good evening'
+    if (timeOfDay === 'morning') return 'Good morning'
+    if (timeOfDay === 'afternoon') return 'Good afternoon'
+    if (timeOfDay === 'evening') return 'Good evening'
+    return 'Wind down'
   }
+
+  const getSubtitle = () => {
+    if (timeOfDay === 'morning') return 'Start your day with intention'
+    if (timeOfDay === 'afternoon') return 'Stay focused, stay present'
+    if (timeOfDay === 'evening') return 'Reflect, revise, release'
+    return 'Prepare your mind for sleep'
+  }
+
+  // Time-based practice recommendations
+  const practicesByTime = {
+    morning: [
+      { id: 'checkin', label: 'Morning Check-in', sub: 'Set your energy and intention' },
+      { id: 'iam', label: 'I AM Declarations', sub: 'Speak your identity into being' },
+      { id: 'goalcard', label: 'Read Your Goal Card', sub: 'Saturate your subconscious' },
+      { id: 'intention', label: 'Set Your Intention', sub: 'Connect to source' },
+      { id: 'readings', label: 'Daily Reading', sub: 'Neville, Proctor, Dyer, Wattles' },
+      { id: 'certainway', label: 'The Certain Way', sub: 'Think clearly, create deliberately' },
+    ],
+    afternoon: [
+      { id: 'coach', label: 'Talk to Coach', sub: 'Your recovery companion' },
+      { id: 'mentaldiet', label: 'Mental Diet', sub: 'Catch and replace thoughts' },
+      { id: 'energy', label: 'Log Energy', sub: 'Track your recovery' },
+      { id: 'increase', label: 'Impression of Increase', sub: 'Give more value today' },
+      { id: 'paradigm', label: 'Paradigm Shift', sub: 'Reprogram old beliefs' },
+      { id: 'terror', label: 'Terror Barrier', sub: 'Push through resistance' },
+    ],
+    evening: [
+      { id: 'revision', label: 'Revise Your Day', sub: 'Rewrite any moment as you wish' },
+      { id: 'journal', label: 'Journal', sub: 'Process and release' },
+      { id: 'rampage', label: 'Gratitude Rampage', sub: 'Pour out appreciation' },
+      { id: 'checkin', label: 'Evening Check-in', sub: 'Rate your day, claim your win' },
+      { id: 'surrender', label: 'Give It to God', sub: 'Release what isn\'t yours' },
+      { id: 'goalcard', label: 'Read Your Goal Card', sub: 'Last thing before bed' },
+    ],
+    night: [
+      { id: 'wishes', label: 'Wishes Fulfilled', sub: 'Fall asleep in the wish fulfilled' },
+      { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
+      { id: 'sats', label: 'SATS', sub: 'State akin to sleep' },
+      { id: 'timer', label: 'Meditation', sub: 'Enter the silence' },
+      { id: 'ladder', label: 'Ladder Experiment', sub: 'Tonight\'s manifestation practice' },
+      { id: 'dreams', label: 'Dream Journal', sub: 'Record before you forget' },
+    ],
+  }
+
+  const currentPractices = practicesByTime[timeOfDay]
+
+  // Always-available tools (no emojis, clean list)
+  const alwaysTools = [
+    { id: 'water', label: 'Water' },
+    { id: 'nourish', label: 'Nourish' },
+    { id: 'bathroom', label: 'Bathroom' },
+    { id: 'run', label: 'Run' },
+    { id: 'health', label: 'Health' },
+    { id: 'cravings', label: 'Cravings' },
+    { id: 'progress', label: 'Photos' },
+    { id: 'vision', label: 'Vision Board' },
+    { id: 'brain', label: 'Brain Science' },
+  ]
+
+  const toolBtn = { background: 'none', border: 'none', cursor: 'pointer', padding: '14px 0',
+    borderBottom: '1px solid rgba(255,255,255,0.04)', width: '100%', textAlign: 'left',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center' }
 
   return (
     <div style={s.page}>
       <div style={{ paddingTop: 20, marginBottom: 28 }}>
         <h1 style={s.greeting}>{getGreeting()}</h1>
-        <p style={{ ...s.subtitle, marginTop: 6 }}>This is your journey</p>
+        <p style={{ ...s.subtitle, marginTop: 6 }}>{getSubtitle()}</p>
       </div>
-
-      {/* SOS Button */}
-      <button onClick={() => setPage('sos')}
-        style={{ width: '100%', ...s.card, marginBottom: 14, textAlign: 'center', cursor: 'pointer',
-          padding: '18px 20px', border: '1px solid rgba(255,100,100,0.15)', background: 'rgba(255,100,100,0.04)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'all 0.2s' }}>
-        <span style={{ fontSize: 22 }}>🆘</span>
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Craving hitting hard?</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Tap here — breathing, timer, your reasons</div>
-        </div>
-      </button>
 
       {/* Timer card */}
       <div style={{ ...s.card, textAlign: 'center', marginBottom: 14 }}>
@@ -608,6 +673,22 @@ function HomePage({ time, quote, setPage }) {
         </div>
       </div>
 
+      {/* Time-based practices */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>
+          {timeOfDay === 'morning' ? 'MORNING PRACTICE' : timeOfDay === 'afternoon' ? 'AFTERNOON PRACTICE' : timeOfDay === 'evening' ? 'EVENING PRACTICE' : 'BEDTIME PRACTICE'}
+        </div>
+        {currentPractices.map((p, i) => (
+          <button key={p.id + i} onClick={() => setPage(p.id)} style={toolBtn}>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>{p.label}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>{p.sub}</div>
+            </div>
+            <span style={s.dim}>{Icons.chevron}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Tasks widget */}
       <div style={{ ...s.card, marginBottom: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -633,67 +714,47 @@ function HomePage({ time, quote, setPage }) {
         {activeTasks.length > 5 && <p style={{ fontSize: 12, ...s.dim, marginTop: 8 }}>+{activeTasks.length - 5} more</p>}
       </div>
 
-      {/* Quick tools grid */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-          {[
-            { id: 'coach', icon: '✦', label: 'Coach' },
-            { id: 'checkin', icon: '☀️', label: 'Check-in' },
-            { id: 'surrender', icon: '🙏', label: 'Give to God' },
-            { id: 'energy', icon: '⚡', label: 'Energy' },
-            { id: 'journal', icon: '📝', label: 'Journal' },
-            { id: 'dreams', icon: '🌙', label: 'Dreams' },
-            { id: 'run', icon: '🏃', label: 'Run' },
-            { id: 'water', icon: '💧', label: 'Water' },
-            { id: 'bathroom', icon: '🚻', label: 'Bathroom' },
-            { id: 'nourish', icon: '🥗', label: 'Nourish' },
-            { id: 'timer', icon: '🧘', label: 'Meditate' },
-            { id: 'visualize', icon: '👁️', label: 'Visualize' },
-            { id: 'vision', icon: '✨', label: 'Vision Board' },
-            { id: 'readings', icon: '📖', label: 'Readings' },
-            { id: 'health', icon: '❤️', label: 'Health' },
-            { id: 'progress', icon: '📸', label: 'Photos' },
-            { id: 'brain', icon: '🧠', label: 'Brain' },
-          ].map(t => (
+      {/* Always available */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>TRACK</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0 }}>
+          {alwaysTools.map(t => (
             <button key={t.id} onClick={() => setPage(t.id)}
-              style={{ ...s.card, textAlign: 'center', cursor: 'pointer', padding: '16px 8px', transition: 'all 0.2s' }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{t.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{t.label}</div>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '14px 8px', textAlign: 'center',
+                borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{t.label}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Milestone — just the current one, subtle */}
+      {/* Milestone */}
       <div style={{ ...s.card, marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-          <span style={{ fontSize: 20 }}>{cur.icon}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{cur.title}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, marginTop: 4 }}>{cur.description}</div>
-          </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 11, ...s.dim, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8 }}>MILESTONE</div>
+          <div style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>{cur.title}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, marginTop: 6 }}>{cur.description}</div>
         </div>
         {nxt && (
-          <div style={{ marginTop: 12 }}>
+          <div style={{ marginTop: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, ...s.dim, marginBottom: 4 }}>
               <span>Now</span><span>{nxt.title}</span>
             </div>
             <div style={s.track}><div style={s.fill(pct)} /></div>
           </div>
         )}
-        <button onClick={() => setPage('brain')} style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 10, letterSpacing: 1 }}>
-          Learn what's happening in your brain →
+        <button onClick={() => setPage('brain')} style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 12, letterSpacing: 1 }}>
+          What's happening in your brain →
         </button>
       </div>
 
-      {/* Neville quote card */}
-      <div style={{ ...s.card, marginTop: 0, textAlign: 'center', padding: '24px 20px' }}>
-        <span style={{ ...s.dim, fontSize: 16 }}>✦</span>
-        <p style={{ fontSize: 16, fontWeight: 300, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginTop: 12, fontStyle: 'italic' }}>
+      {/* Quote */}
+      <div style={{ ...s.card, textAlign: 'center', padding: '24px 20px' }}>
+        <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.15)', margin: '0 auto 16px' }} />
+        <p style={{ fontSize: 16, fontWeight: 300, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, fontStyle: 'italic' }}>
           "{quote}"
         </p>
-        <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 12 }}>Neville Goddard</p>
+        <p style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 14 }}>Neville Goddard</p>
       </div>
     </div>
   )
@@ -703,51 +764,129 @@ function HomePage({ time, quote, setPage }) {
 // BRAIN
 // ============================================================
 
+const DAILY_BREAKDOWN = [
+  { day: 1, title: 'The Decision', symptoms: ['Restlessness', 'Irritability', 'Anxiety', 'Reduced appetite', 'Difficulty sleeping'], brain: 'THC is still being metabolized by your liver. CB1 receptors are starting to notice the supply has stopped. Your endocannabinoid system is sounding the alarm. GABA and glutamate — your brain\'s brake and gas pedals — are out of balance. This is why you feel on edge.', body: 'Heart rate normalizing. Body temperature may fluctuate. You might sweat more than usual. Your gut has cannabinoid receptors too — appetite disruption is your digestive system recalibrating.', survive: 'Drink water constantly. Your brain needs it to run the enzymatic processes clearing THC. Eat even if you\'re not hungry — your brain burns 20% of your calories. Go to bed at the same time even if you can\'t sleep.' },
+  { day: 2, title: 'Emotions Resurface', symptoms: ['Intense emotions', 'Mood swings', 'Vivid dreams begin', 'Cravings intensify', 'Brain fog'], brain: 'CB1 receptor upregulation has begun — your brain is literally growing new receptor sites. Your amygdala (emotional center) is coming back online at full volume after being dampened by THC. Emotions you haven\'t felt in months are flooding in. This is not weakness. This is your brain healing.', body: 'Night sweats are common — your body is purging THC stored in fat cells through sweat. REM rebound starts tonight. Dreams will be more vivid than anything you\'ve experienced. This is your brain clearing a backlog of unprocessed emotional material.', survive: 'Let yourself feel. Don\'t judge the emotions. Journal them. Every feeling that moves through you is one that no longer needs to be stored. Cold showers reset your nervous system fast.' },
+  { day: 3, title: 'Peak Withdrawal', symptoms: ['Strongest cravings', 'Low motivation', 'Flat mood', 'Insomnia', 'Headaches possible'], brain: 'This is often the hardest day. Dopamine levels are at their LOWEST point. Your brain reduced its natural dopamine production because THC was providing artificial surges. Your nucleus accumbens (reward center) is screaming for the substance. But your prefrontal cortex is building new inhibitory connections RIGHT NOW — the neural infrastructure of willpower.', body: 'Your body is working overtime. Liver enzymes are breaking down remaining THC metabolites. Stay hydrated — dehydration makes every symptom worse. Appetite may be nonexistent. Force yourself to eat small meals.', survive: 'This is the day most people relapse. If you make it through today, the worst is behind you. Do the 4-7-8 breathing. Use the SOS button. Talk to the coach. Do NOT be alone with the craving — move your body, call someone, get outside.' },
+  { day: 4, title: 'The Shift', symptoms: ['Cravings still present', 'Sleep slightly better', 'Moments of clarity', 'Appetite returning', 'Emotional sensitivity'], brain: 'Your GABAergic system is rebalancing. GABA is your brain\'s primary calming neurotransmitter — it\'s normalizing without external cannabinoid input. You\'ll notice moments of unexpected calm between waves of discomfort. Your default mode network (the one Neville\'s visualization activates) is becoming more accessible.', body: 'Night sweats may continue. Your autonomic nervous system is recalibrating — temperature regulation, sweating, heart rate are all finding new baselines. Your gut bacteria are shifting too, which affects mood through the gut-brain axis.', survive: 'Notice the moments of clarity. They\'re brief but real. That\'s your brain showing you what\'s coming. Write down WHY you quit. Read it when a craving hits.' },
+  { day: 5, title: 'Appetite Returns', symptoms: ['Hunger comes back', 'Dreams intensifying', 'Better focus moments', 'Emotional waves', 'Energy still low'], brain: 'Your hypothalamus is recalibrating hunger signals. Serotonin production in your gut (90% of serotonin is made there) is stabilizing. Dreams are at peak intensity now — REM rebound is in full force. Every vivid dream is your brain processing weeks of unprocessed emotional material. Your brain is literally doing maintenance.', body: 'Eat brain-building foods: salmon, eggs, blueberries, walnuts, dark leafy greens. Your brain is hungry for the raw materials to rebuild. Omega-3s for cell membranes. Choline for memory. Antioxidants for protection.', survive: 'Use the energy tracker. You\'ll start seeing the pattern — energy comes in waves but the baseline is rising. Even 10 minutes of walking floods your brain with BDNF.' },
+  { day: 6, title: 'Neuroplasticity Opens', symptoms: ['Brain fog lifting', 'Better verbal recall', 'Sleep improving', 'Cravings less intense', 'Emotional depth'], brain: 'BDNF (Brain-Derived Neurotrophic Factor) levels are increasing — this is literal fertilizer for your neurons. Your brain has entered a window of enhanced neuroplasticity. Every new habit you practice, every I AM declaration, every visualization is being encoded more deeply than it would have been while using. This is the window where the work has outsized impact.', body: 'Your endocannabinoid system is producing more anandamide — the bliss molecule — on its own. You may get brief moments of natural euphoria that feel different from being high. Cleaner. Realer.', survive: 'USE THIS WINDOW. Do your SATS. Do your revisions. Practice your I AM declarations. Your brain is hungry to rewire and everything you feed it right now gets carved deeper.' },
+  { day: 7, title: 'One Week', symptoms: ['Sleep architecture rebuilding', 'Memory improving', 'Cravings becoming manageable', 'Mood stabilizing', 'Brain fog clearing'], brain: 'Your sleep cycles are getting longer and more structured. Memory consolidation is improving — your hippocampus is processing information more effectively. You\'ll notice you\'re remembering names, conversations, details better. Verbal fluency is returning. The anandamide your body produces naturally is smoother and more attuned to your actual needs than external THC ever was.', body: 'Physical symptoms are fading. Your body has cleared most active THC. THC-COOH (the inactive metabolite stored in fat) will continue clearing for weeks, but it\'s not affecting your brain anymore. Your cortisol patterns are normalizing.', survive: 'Celebrate this. One week is massive. Your brain has done more healing in 7 days than most people realize is possible. Keep going — the next 7 days compound what you\'ve built.' },
+  { day: 8, title: 'Building Momentum', symptoms: ['More consistent energy', 'Cravings less frequent', 'Sleep getting deeper', 'Emotions more manageable', 'Clearer thinking'], brain: 'Neural pathways associated with cannabis use are weakening through disuse. Every day you don\'t use, the synaptic connections that drove the habit get pruned. Meanwhile, every new practice — gratitude, journaling, visualization — is strengthening new pathways. This is literally Neville\'s law playing out at the cellular level: what you focus on grows.', body: 'Your body\'s stress response system (HPA axis) is recalibrating. Cortisol — the stress hormone — is finding a healthier daily rhythm. You\'ll handle unexpected stress better today than you did on Day 3.', survive: 'Start noticing what feels different. Write it down. On hard days ahead, this list is your evidence that recovery is real and working.' },
+  { day: 9, title: 'Natural Rewards Return', symptoms: ['Food tastes better', 'Music hits different', 'Colors more vivid', 'Natural laughter', 'Sleep dreams calming'], brain: 'Your dopamine receptors are resensitizing. Normal, everyday pleasures are starting to register again at their full intensity. A good meal, a song, a sunset, a genuine laugh — these things were dampened by artificial dopamine surges. Now they\'re coming back.', body: 'Appetite is normalizing. You may crave specific nutrients your brain needs — follow those cravings (for food, not weed). Your body knows what it needs to rebuild.', survive: 'Pay attention to the small pleasures. That\'s your reward system healing. The flat, gray feeling is lifting. This is what natural joy feels like.' },
+  { day: 10, title: 'Emotional Depth', symptoms: ['Deep feelings', 'Sensitivity to beauty', 'Presence', 'Less brain fog', 'Rare cravings'], brain: 'The acute withdrawal window is closing. What remains is deeper processing. Your dopamine system is producing and receiving at closer-to-normal levels. Music sounds different because your auditory cortex is processing without interference. Conversations feel more present because your prefrontal cortex is fully online.', body: 'Most physical withdrawal symptoms have passed. Any remaining discomfort is psychological — habitual patterns, environmental triggers, social situations. Your body is functioning well.', survive: 'You\'re through the hardest part. Days 1-10 are the mountain. You climbed it. Everything from here compounds.' },
+  { day: 14, title: 'Two Weeks', symptoms: ['Memory noticeably sharper', 'Better decisions', 'Stable mood', 'Deep sleep', 'Identity shifting'], brain: 'CB1 receptor density in cortical regions is approaching normal levels. Brain imaging studies show measurable structural differences between Day 1 and Day 14. Verbal memory is objectively better. Attention span is longer. Your prefrontal cortex is making stronger connections — better planning, better impulse control, better emotional regulation.', body: 'Your circadian rhythm is resetting. If you\'ve been going to bed and waking at consistent times, your body is locking in. Sleep is becoming genuinely restorative — the kind where you wake up actually rested.', survive: 'You\'re not the same person who quit two weeks ago. The neural architecture is different. Trust the process — your brain is doing exactly what it\'s supposed to do.' },
+  { day: 21, title: 'Three Weeks', symptoms: ['Natural calm', 'Steady energy', 'Vivid but manageable dreams', 'Genuine motivation', 'Stress resilience'], brain: 'Most physical withdrawal symptoms have fully resolved. Your body is producing anandamide and 2-AG at normal levels — these natural endocannabinoids are smoother, subtler, and perfectly calibrated to your needs. Your stress response is even. Your ability to learn and adapt is markedly improved.', body: 'You may notice your skin looks better, your eyes are clearer, your breathing is easier. THC metabolites stored in fat are still clearing but at low levels. Your body is functioning as designed.', survive: 'This is where the real transformation begins. The withdrawal is over. Now it\'s about building. Every practice you do now is building the architecture of your new life.' },
+  { day: 30, title: 'One Month', symptoms: ['Cognitive clarity', 'Emotional stability', 'Strong willpower', 'Natural energy', 'Identity fully shifting'], brain: 'Significant cognitive recovery across all domains. Working memory is sharper. Sustained attention is stronger. Processing speed has increased. Neural pruning is accelerating — your brain is actively dismantling the old pathways dedicated to cannabis and redirecting that neural real estate to whatever you\'re focused on now. Your default emotional state is more stable than it\'s been in a long time.', body: 'Your body has fully adapted. Sleep is deep and restorative. Appetite is natural. Energy comes in strong, sustained waves. You look different, feel different, think different.', survive: 'You did it. 30 days. But don\'t stop — the brain continues healing for 90 days, and the gains from Day 30-90 are where everything locks in permanently. Keep going.' },
+]
+
 function BrainPage({ time, onBack }) {
   const [expanded, setExpanded] = useState(null)
+  const [expandedDay, setExpandedDay] = useState(null)
+  const [expandedArticle, setExpandedArticle] = useState(null)
   const { cur } = getMilestone(time.totalHours)
+  const currentDay = Math.floor(time.totalHours / 24) + 1
+
+  // Find the current daily breakdown
+  const currentDayInfo = DAILY_BREAKDOWN.find((d, i) => {
+    const next = DAILY_BREAKDOWN[i + 1]
+    return currentDay >= d.day && (!next || currentDay < next.day)
+  }) || DAILY_BREAKDOWN[0]
 
   return (
     <div style={s.page}>
-      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
         <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
       </button>
-      <div style={{ paddingTop: 12, marginBottom: 24 }}>
-        <h1 style={s.greeting}>Your brain right now</h1>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Day {currentDay}</h1>
         <p style={s.subtitle}>{Math.floor(time.totalHours)} hours into recovery</p>
       </div>
 
-      <div style={{ ...s.card, marginBottom: 14 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 28 }}>{cur.icon}</span>
-          <div style={s.cardTitle}>{cur.title}</div>
+      {/* What's happening RIGHT NOW */}
+      <div style={{ ...s.card, marginBottom: 14, border: '1px solid rgba(255,255,255,0.15)' }}>
+        <div style={s.label}>WHAT'S HAPPENING RIGHT NOW</div>
+        <div style={{ fontSize: 18, fontWeight: 500, color: '#fff', marginBottom: 12 }}>{currentDayInfo.title}</div>
+        <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: 16 }}>{currentDayInfo.brain}</div>
+
+        <div style={s.label}>WHAT YOU MAY BE FEELING</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+          {currentDayInfo.symptoms.map(sym => (
+            <span key={sym} style={{ padding: '8px 14px', borderRadius: 999, fontSize: 13, background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{sym}</span>
+          ))}
         </div>
-        <div style={s.cardText}>{cur.description}</div>
+
+        <div style={s.label}>YOUR BODY</div>
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 16 }}>{currentDayInfo.body}</div>
+
+        <div style={s.label}>HOW TO GET THROUGH THIS</div>
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>{currentDayInfo.survive}</div>
       </div>
 
-      <div style={{ ...s.label, marginTop: 24 }}>TIMELINE</div>
-      {NEURAL_MILESTONES.map((m, i) => {
-        const reached = time.totalHours >= m.hours
+      {/* Day by day breakdown */}
+      <div style={{ ...s.label, marginTop: 24, marginBottom: 10 }}>YOUR 30-DAY JOURNEY</div>
+      {DAILY_BREAKDOWN.map((d, i) => {
+        const reached = currentDay >= d.day
+        const isExpanded = expandedDay === i
         return (
-          <div key={i} style={{ ...s.card, marginBottom: 6, opacity: reached ? 1 : 0.3, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
-            <span style={{ fontSize: 16 }}>{m.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#fff' }}>{m.title}</div>
-              {reached && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{m.description.slice(0, 80)}...</div>}
+          <div key={i} onClick={() => setExpandedDay(isExpanded ? null : i)}
+            style={{ ...s.card, marginBottom: 6, opacity: reached ? 1 : 0.4, cursor: 'pointer' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: reached ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                  border: currentDay >= d.day && currentDay < (DAILY_BREAKDOWN[i + 1]?.day || 999) ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: reached ? '#fff' : 'rgba(255,255,255,0.3)' }}>{d.day}</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: '#fff' }}>{d.title}</div>
+                  {!isExpanded && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{d.symptoms.slice(0, 3).join(' · ')}</div>}
+                </div>
+              </div>
+              <span style={{ ...s.dim, fontSize: 12, transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
             </div>
-            {reached && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>✓</span>}
+            {isExpanded && (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={s.label}>YOUR BRAIN</div>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 14 }}>{d.brain}</p>
+                <div style={s.label}>YOUR BODY</div>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 14 }}>{d.body}</p>
+                <div style={s.label}>SURVIVE THIS</div>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 14 }}>{d.survive}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {d.symptoms.map(sym => (
+                    <span key={sym} style={{ padding: '6px 12px', borderRadius: 999, fontSize: 12, background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>{sym}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )
       })}
 
-      <div style={{ ...s.label, marginTop: 24 }}>DEEP READS</div>
-      {BRAIN_ARTICLES.map((a, i) => (
-        <div key={i} style={{ ...s.card, marginBottom: 8, cursor: 'pointer' }} onClick={() => setExpanded(expanded === i ? null : i)}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{a.title}</div>
-            <span style={{ ...s.dim, fontSize: 12, transform: expanded === i ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
+      {/* Long-term milestones */}
+      <div style={{ ...s.label, marginTop: 24, marginBottom: 10 }}>BEYOND 30 DAYS</div>
+      {NEURAL_MILESTONES.filter(m => m.hours >= 1080).map((m, i) => {
+        const reached = time.totalHours >= m.hours
+        return (
+          <div key={i} style={{ ...s.card, marginBottom: 6, opacity: reached ? 1 : 0.4 }}>
+            <div style={{ fontSize: 15, fontWeight: 500, color: '#fff' }}>{m.title}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginTop: 6 }}>{m.description}</div>
           </div>
-          {expanded === i && <div style={{ ...s.cardText, marginTop: 12 }}>{a.content}</div>}
+        )
+      })}
+
+      {/* Deep reads */}
+      <div style={{ ...s.label, marginTop: 24, marginBottom: 10 }}>DEEP READS</div>
+      {BRAIN_ARTICLES.map((a, i) => (
+        <div key={i} style={{ ...s.card, marginBottom: 8, cursor: 'pointer' }} onClick={() => setExpandedArticle(expandedArticle === i ? null : i)}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 15, fontWeight: 500, color: '#fff' }}>{a.title}</div>
+            <span style={{ ...s.dim, fontSize: 12, transform: expandedArticle === i ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
+          </div>
+          {expandedArticle === i && <div style={{ ...s.cardText, marginTop: 12 }}>{a.content}</div>}
         </div>
       ))}
     </div>
@@ -1162,42 +1301,81 @@ function NutritionPage({ onBack }) {
 // ============================================================
 
 function MorePage({ setPage }) {
-  const items = [
-    { id: 'dreams', label: 'Dream Journal', sub: 'Your brain is learning to dream again' },
-    { id: 'nourish', label: 'Nourish', sub: 'What food does for your brain' },
-    { id: 'run', label: 'Run Tracker', sub: 'GPS tracking, distance, pace' },
-    { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
-    { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
-    { id: 'bathroom', label: 'Bathroom Tracker', sub: 'Your body is detoxing' },
-    { id: 'progress', label: 'Progress Photos', sub: 'Watch yourself transform' },
-    { id: 'vision', label: 'Vision Board', sub: 'See it, feel it, become it' },
-    { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
-    { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
-    { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
-    { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
-    { id: 'checkin', label: 'Daily Check-in', sub: 'Morning + night ritual' },
-    { id: 'surrender', label: 'Give It to God', sub: 'Release what isn\'t yours to carry' },
-    { id: 'energy', label: 'Energy Tracker', sub: 'Track it, watch it come back' },
-    { id: 'journal', label: 'Journal', sub: 'Process, release, grow' },
-    { id: 'readings', label: 'Daily Readings', sub: 'Neville, Proctor, Dyer' },
-    { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
+  const sections = [
+    { title: 'NEVILLE GODDARD', items: [
+      { id: 'revision', label: 'Revision', sub: 'Rewrite any moment as you wished it happened' },
+      { id: 'iam', label: 'I AM Declarations', sub: 'Speak your identity into being' },
+      { id: 'ladder', label: 'Ladder Experiment', sub: 'Prove the law to yourself' },
+      { id: 'mentaldiet', label: 'Mental Diet', sub: 'Catch the thought, replace the thought' },
+      { id: 'surrender', label: 'Give It to God', sub: 'Release what isn\'t yours to carry' },
+      { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
+      { id: 'sats', label: 'SATS', sub: 'State akin to sleep' },
+      { id: 'readings', label: 'Daily Readings', sub: 'Neville, Proctor, Dyer, Wattles' },
+    ]},
+    { title: 'BOB PROCTOR', items: [
+      { id: 'goalcard', label: 'Goal Card', sub: 'Your one goal, morning and night' },
+      { id: 'paradigm', label: 'Paradigm Tracker', sub: 'Old beliefs to new beliefs' },
+      { id: 'terror', label: 'Terror Barrier', sub: 'Log and push through resistance' },
+    ]},
+    { title: 'WAYNE DYER', items: [
+      { id: 'intention', label: 'Power of Intention', sub: 'Connect to source each morning' },
+      { id: 'wishes', label: 'Wishes Fulfilled', sub: 'Fall asleep in the wish fulfilled' },
+    ]},
+    { title: 'WALLACE WATTLES', items: [
+      { id: 'certainway', label: 'The Certain Way', sub: 'Desire, gratitude, faith' },
+      { id: 'increase', label: 'Impression of Increase', sub: 'Give more value than you receive' },
+      { id: 'rampage', label: 'Gratitude Rampage', sub: 'Pour out appreciation' },
+    ]},
+    { title: 'RECOVERY', items: [
+      { id: 'coach', label: 'Coach', sub: 'Your AI recovery companion' },
+      { id: 'checkin', label: 'Daily Check-in', sub: 'Morning and evening ritual' },
+      { id: 'energy', label: 'Energy', sub: 'Track your recovery' },
+      { id: 'cravings', label: 'Cravings', sub: 'Every resist is a win' },
+      { id: 'sos', label: 'SOS', sub: 'Emergency craving support' },
+      { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
+      { id: 'dreams', label: 'Dream Journal', sub: 'Your brain is dreaming again' },
+    ]},
+    { title: 'BODY', items: [
+      { id: 'water', label: 'Water', sub: 'Your brain is 73% water' },
+      { id: 'nourish', label: 'Nourish', sub: 'What food does for recovery' },
+      { id: 'bathroom', label: 'Bathroom', sub: 'Your body is detoxing' },
+      { id: 'run', label: 'Run', sub: 'GPS tracking, distance, pace' },
+      { id: 'health', label: 'Health', sub: 'Daily check-in' },
+    ]},
+    { title: 'JOURNAL & REFLECT', items: [
+      { id: 'journal', label: 'Journal', sub: 'Process, release, grow' },
+      { id: 'gratitude', label: 'Gratitude', sub: 'What you appreciate appreciates' },
+      { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
+      { id: 'work', label: 'Work Tasks', sub: 'Focus and productivity' },
+      { id: 'timer', label: 'Meditation', sub: 'Enter the silence' },
+      { id: 'vision', label: 'Vision Board', sub: 'See it, become it' },
+      { id: 'progress', label: 'Progress Photos', sub: 'Watch yourself transform' },
+    ]},
   ]
+
+  const toolBtn = { background: 'none', border: 'none', cursor: 'pointer', padding: '14px 0',
+    borderBottom: '1px solid rgba(255,255,255,0.04)', width: '100%', textAlign: 'left',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center' }
 
   return (
     <div style={s.page}>
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
-        <h1 style={s.greeting}>Your tools</h1>
-        <p style={s.subtitle}>Everything for your journey</p>
+        <h1 style={s.greeting}>Everything</h1>
+        <p style={s.subtitle}>All your tools, organized by practice</p>
       </div>
-      {items.map(it => (
-        <button key={it.id} onClick={() => setPage(it.id)}
-          style={{ ...s.card, marginBottom: 10, width: '100%', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
-          <div>
-            <div style={s.cardTitle}>{it.label}</div>
-            <div style={{ fontSize: 11, ...s.dim, marginTop: 4 }}>{it.sub}</div>
-          </div>
-          <span style={s.dim}>{Icons.chevron}</span>
-        </button>
+      {sections.map(sec => (
+        <div key={sec.title} style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>{sec.title}</div>
+          {sec.items.map(it => (
+            <button key={it.id} onClick={() => setPage(it.id)} style={toolBtn}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>{it.label}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>{it.sub}</div>
+              </div>
+              <span style={s.dim}>{Icons.chevron}</span>
+            </button>
+          ))}
+        </div>
       ))}
     </div>
   )
@@ -3670,6 +3848,1056 @@ function SOSPage({ onBack }) {
 }
 
 // ============================================================
+// REVISION (Neville Goddard)
+// ============================================================
+
+const REVISION_PROMPTS = [
+  'What moment from today would you like to revise?',
+  'If you could replay one scene differently, what would it be?',
+  'What conversation didn\'t go the way you wanted?',
+  'What situation left you feeling less than your best?',
+]
+
+function RevisionPage({ onBack }) {
+  const [revisions, revisionsDb] = useSync('revisions', 'revisions')
+  const [original, setOriginal] = useState('')
+  const [revised, setRevised] = useState('')
+  const [prompt] = useState(REVISION_PROMPTS[Math.floor(Math.random() * REVISION_PROMPTS.length)])
+  const [showDone, setShowDone] = useState(false)
+  const micOrig = useSpeech((t) => setOriginal(t))
+  const micRev = useSpeech((t) => setRevised(t))
+  const today = new Date().toDateString()
+  const todayRevisions = revisions.filter(r => new Date(r.created_at).toDateString() === today)
+
+  const submit = () => {
+    if (!original.trim() || !revised.trim()) return
+    revisionsDb.add({ original: original.trim(), revised: revised.trim() })
+    setOriginal(''); setRevised('')
+    micOrig.stop(); micRev.stop()
+    setShowDone(true)
+    setTimeout(() => setShowDone(false), 3000)
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Revision</h1>
+        <p style={s.subtitle}>Neville Goddard — rewrite any moment as you wish it had been</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Revise the past and the future will conform to your revision." — Neville Goddard
+        </p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>WHAT HAPPENED</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>{prompt}</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <MicBtn listening={micOrig.listening} onPress={() => micOrig.toggle(original)} />
+          <textarea value={original} onChange={e => setOriginal(e.target.value)}
+            placeholder="Write what actually happened..."
+            style={{ ...s.textarea, minHeight: 80 }} />
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: 14, fontSize: 20 }}>↓</div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>THE REVISED VERSION</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>Now rewrite it exactly as you wish it had happened. Feel it as real.</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <MicBtn listening={micRev.listening} onPress={() => micRev.toggle(revised)} />
+          <textarea value={revised} onChange={e => setRevised(e.target.value)}
+            placeholder="In my revised version, what happened was..."
+            style={{ ...s.textarea, minHeight: 80 }} />
+        </div>
+      </div>
+
+      <button onClick={submit} disabled={!original.trim() || !revised.trim()}
+        style={{ ...s.btnPrimary, width: '100%', opacity: original.trim() && revised.trim() ? 1 : 0.3, marginBottom: 14 }}>
+        Seal the Revision ✦
+      </button>
+
+      <AnimatePresence>
+        {showDone && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ textAlign: 'center', marginBottom: 14, padding: 20 }}>
+            <span style={{ fontSize: 32 }}>✦</span>
+            <p style={{ fontSize: 16, color: '#fff', marginTop: 10 }}>It is done. The old version no longer exists.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {revisions.length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <div style={s.label}>PAST REVISIONS ({revisions.length})</div>
+          {revisions.slice(0, 10).map(r => (
+            <div key={r.id} style={{ ...s.card, marginBottom: 10 }}>
+              <div style={{ fontSize: 11, ...s.dim, marginBottom: 8 }}>{new Date(r.created_at).toLocaleDateString()}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 8, textDecoration: 'line-through' }}>{r.original}</div>
+              <div style={{ fontSize: 15, color: '#fff', lineHeight: 1.6 }}>✦ {r.revised}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// I AM DECLARATIONS (Neville Goddard)
+// ============================================================
+
+const IAM_SUGGESTIONS = [
+  'I AM healthy and full of energy',
+  'I AM free from every addiction',
+  'I AM attracting abundance effortlessly',
+  'I AM deeply loved and connected',
+  'I AM the operant power in my life',
+  'I AM living in the wish fulfilled',
+  'I AM calm, clear, and focused',
+  'I AM worthy of everything I desire',
+  'I AM transforming every single day',
+  'I AM grateful for this moment',
+]
+
+function IAMPage({ onBack }) {
+  const [declarations, declDb] = useSync('iam_declarations', 'iam_declarations')
+  const [input, setInput] = useState('')
+  const [speaking, setSpeaking] = useState(false)
+  const [currentIdx, setCurrentIdx] = useState(0)
+  const mic = useSpeech((t) => setInput(t))
+
+  const add = () => {
+    if (!input.trim()) return
+    const text = input.trim().startsWith('I AM') || input.trim().startsWith('I am') ? input.trim() : 'I AM ' + input.trim()
+    declDb.add({ text })
+    setInput(''); mic.stop()
+  }
+
+  const speakAll = () => {
+    if (!declarations.length) return
+    if (speaking) { window.speechSynthesis?.cancel(); setSpeaking(false); return }
+    setSpeaking(true)
+    let idx = 0
+    const speakNext = () => {
+      if (idx >= declarations.length) { setSpeaking(false); return }
+      setCurrentIdx(idx)
+      const utter = new SpeechSynthesisUtterance(declarations[idx].text)
+      utter.rate = 0.85; utter.pitch = 1
+      utter.onend = () => { idx++; setTimeout(speakNext, 800) }
+      utter.onerror = () => { setSpeaking(false) }
+      window.speechSynthesis.speak(utter)
+    }
+    speakNext()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>I AM</h1>
+        <p style={s.subtitle}>Neville Goddard — "I AM is the way"</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Whatever you attach to 'I AM', you become. I AM is God — the creative power within you." — Neville
+        </p>
+      </div>
+
+      {declarations.length > 0 && (
+        <button onClick={speakAll}
+          style={{ ...s.btnPrimary, width: '100%', marginBottom: 14, background: speaking ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.1)' }}>
+          {speaking ? '⏸ Stop' : '🔊 Speak My Declarations'}
+        </button>
+      )}
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>ADD DECLARATION</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}
+            placeholder="I AM..." style={{ ...s.input, flex: 1 }} />
+          <button onClick={add} style={{ ...s.btnSecondary, flexShrink: 0 }}>+</button>
+        </div>
+      </div>
+
+      {declarations.length === 0 && (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>SUGGESTIONS — TAP TO ADD</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {IAM_SUGGESTIONS.map(sug => (
+              <button key={sug} onClick={() => declDb.add({ text: sug })}
+                style={{ ...s.pill, fontSize: 13 }}>{sug}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {declarations.map((d, i) => (
+        <motion.div key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          style={{ ...s.card, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            border: speaking && i === currentIdx ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
+          <span style={{ fontSize: 17, fontWeight: 500, color: '#fff' }}>{d.text}</span>
+          <button onClick={() => declDb.remove(d.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.15)' }}>×</button>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// LADDER EXPERIMENT (Neville Goddard)
+// ============================================================
+
+const LADDER_CHALLENGES = [
+  { title: 'The Classic Ladder', instructions: 'Tonight as you fall asleep, vividly imagine climbing a ladder. Feel your hands gripping each rung, the texture of the metal, your feet stepping up. During the day, place sticky notes everywhere saying "I will NOT climb a ladder." Do this for 3 nights. Within days, you will find yourself climbing a ladder in waking life.', days: 3 },
+  { title: 'The Phone Call', instructions: 'Imagine a specific person calling you with wonderful news. Hear their voice, feel the phone in your hand, feel the excitement. Do this every night for 5 nights as you drift off to sleep.', days: 5 },
+  { title: 'The Congratulations', instructions: 'Imagine a friend shaking your hand or hugging you saying "Congratulations! I\'m so happy for you!" Feel their hand, see their smile, hear the words. Do this nightly until it manifests.', days: 7 },
+  { title: 'The Smell Test', instructions: 'As you fall asleep, imagine smelling roses intensely. Really SMELL them. Within days, roses will appear in your life in unexpected ways.', days: 3 },
+  { title: 'Finding Money', instructions: 'Before sleep, imagine holding a specific amount of money in your hand. Feel the texture of the bills, count them, feel grateful. Do this for 5 nights.', days: 5 },
+]
+
+function LadderPage({ onBack }) {
+  const [experiments, expDb] = useSync('ladder_experiments', 'ladder_experiments')
+  const [showPick, setShowPick] = useState(false)
+  const active = experiments.find(e => e.status === 'active')
+
+  const startChallenge = (ch) => {
+    expDb.add({ challenge: ch.title, instructions: ch.instructions, day: 1, status: 'active' })
+    setShowPick(false)
+  }
+
+  const logDay = () => {
+    if (!active) return
+    const newDay = (active.day || 1) + 1
+    expDb.update(active.id, { day: newDay })
+  }
+
+  const complete = () => {
+    if (!active) return
+    expDb.update(active.id, { status: 'manifested' })
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>The Ladder</h1>
+        <p style={s.subtitle}>Neville's manifestation experiments — prove the law to yourself</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Don't try to make it happen. Simply assume the feeling of the wish fulfilled and let it harden into fact." — Neville
+        </p>
+      </div>
+
+      {active ? (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>ACTIVE EXPERIMENT</div>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#fff', marginBottom: 10 }}>{active.challenge}</h2>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 16 }}>{active.instructions}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+            <div style={s.stat}>{active.day || 1}</div>
+            <div style={{ fontSize: 14, ...s.dim }}>nights completed</div>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={logDay} style={{ ...s.btnSecondary, flex: 1 }}>Did tonight's session ✓</button>
+            <button onClick={complete} style={{ ...s.btnPrimary, flex: 1 }}>It manifested! ✦</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <button onClick={() => setShowPick(!showPick)} style={{ ...s.btnPrimary, width: '100%', marginBottom: 14 }}>
+            Start an Experiment
+          </button>
+          {showPick && LADDER_CHALLENGES.map(ch => (
+            <button key={ch.title} onClick={() => startChallenge(ch)}
+              style={{ ...s.card, marginBottom: 10, width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+              <div style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>{ch.title}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6, lineHeight: 1.6 }}>{ch.instructions.slice(0, 100)}...</div>
+              <div style={{ fontSize: 11, ...s.dim, marginTop: 8 }}>{ch.days} nights</div>
+            </button>
+          ))}
+        </>
+      )}
+
+      {experiments.filter(e => e.status === 'manifested').length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <div style={s.label}>MANIFESTED ✦</div>
+          {experiments.filter(e => e.status === 'manifested').map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 8 }}>
+              <div style={{ fontSize: 15, color: '#fff' }}>✦ {e.challenge}</div>
+              <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>{e.day} nights • {new Date(e.created_at).toLocaleDateString()}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// MENTAL DIET (Neville Goddard)
+// ============================================================
+
+function MentalDietPage({ onBack }) {
+  const [entries, dietDb] = useSync('mental_diet', 'mental_diet')
+  const [thought, setThought] = useState('')
+  const [replacement, setReplacement] = useState('')
+  const mic1 = useSpeech((t) => setThought(t))
+  const mic2 = useSpeech((t) => setReplacement(t))
+  const today = new Date().toDateString()
+  const todayCaught = entries.filter(e => new Date(e.created_at).toDateString() === today).length
+  const totalCaught = entries.length
+
+  const catchThought = () => {
+    if (!thought.trim()) return
+    dietDb.add({ thought: thought.trim(), replacement: replacement.trim() || null })
+    setThought(''); setReplacement('')
+    mic1.stop(); mic2.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Mental Diet</h1>
+        <p style={s.subtitle}>Neville — catch the thought, replace the thought</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "You must be careful of your mental diet. What you think, you become. What you feel, you attract. What you imagine, you create." — Neville
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{todayCaught}</div>
+          <div style={s.statUnit}>Caught Today</div>
+        </div>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{totalCaught}</div>
+          <div style={s.statUnit}>All Time</div>
+        </div>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>CATCH A NEGATIVE THOUGHT</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic1.listening} onPress={() => mic1.toggle(thought)} />
+          <input value={thought} onChange={e => setThought(e.target.value)}
+            placeholder="The thought I caught..." style={{ ...s.input, flex: 1 }} />
+        </div>
+        <div style={s.label}>REPLACE WITH</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic2.listening} onPress={() => mic2.toggle(replacement)} />
+          <input value={replacement} onChange={e => setReplacement(e.target.value)}
+            placeholder="What I choose to think instead..." style={{ ...s.input, flex: 1 }} />
+        </div>
+        <button onClick={catchThought} disabled={!thought.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: thought.trim() ? 1 : 0.3 }}>
+          Catch & Replace
+        </button>
+      </div>
+
+      {entries.slice(0, 20).map(e => (
+        <div key={e.id} style={{ ...s.card, marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>{e.thought}</div>
+          {e.replacement && <div style={{ fontSize: 15, color: '#fff', marginTop: 6 }}>→ {e.replacement}</div>}
+          <div style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{new Date(e.created_at).toLocaleString()}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// GOAL CARD (Bob Proctor)
+// ============================================================
+
+function GoalCardPage({ onBack }) {
+  const [goals, goalDb] = useSync('goal_card', 'goal_card')
+  const [input, setInput] = useState('')
+  const [flipped, setFlipped] = useState(false)
+  const mic = useSpeech((t) => setInput(t))
+  const activeGoal = goals[0]
+
+  const setGoal = () => {
+    if (!input.trim()) return
+    goalDb.add({ goal: input.trim(), read_count: 0 })
+    setInput(''); mic.stop()
+  }
+
+  const markRead = () => {
+    if (activeGoal) goalDb.update(activeGoal.id, { read_count: (activeGoal.read_count || 0) + 1, last_read: new Date().toISOString() })
+  }
+
+  const speakGoal = () => {
+    if (!activeGoal || !('speechSynthesis' in window)) return
+    const utter = new SpeechSynthesisUtterance(activeGoal.goal)
+    utter.rate = 0.85; utter.pitch = 1
+    window.speechSynthesis.speak(utter)
+    markRead()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Goal Card</h1>
+        <p style={s.subtitle}>Bob Proctor — carry your goal with you everywhere</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Write your goal on a card. Carry it everywhere. Read it morning and night. Let it saturate your subconscious mind." — Bob Proctor
+        </p>
+      </div>
+
+      {activeGoal ? (
+        <>
+          <motion.div onClick={() => setFlipped(!flipped)}
+            style={{ ...s.card, marginBottom: 14, padding: '40px 24px', textAlign: 'center', cursor: 'pointer',
+              background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.15)', minHeight: 180,
+              display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ fontSize: 9, ...s.dim, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 20 }}>MY GOAL</div>
+            <p style={{ fontSize: 20, fontWeight: 400, color: '#fff', lineHeight: 1.7 }}>{activeGoal.goal}</p>
+            <div style={{ fontSize: 11, ...s.dim, marginTop: 20 }}>Read {activeGoal.read_count || 0} times</div>
+          </motion.div>
+
+          <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+            <button onClick={markRead} style={{ ...s.btnSecondary, flex: 1 }}>I Read It ✓</button>
+            <button onClick={speakGoal} style={{ ...s.btnPrimary, flex: 1 }}>🔊 Hear It</button>
+          </div>
+
+          <button onClick={() => { if (confirm('Set a new goal?')) { setInput(activeGoal.goal) } }}
+            style={{ ...s.btnSecondary, width: '100%', fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+            Change My Goal
+          </button>
+        </>
+      ) : (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>WRITE YOUR GOAL</div>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 12 }}>Write it in present tense, as if you already have it. Be specific. "I am so happy and grateful now that..."</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
+            <textarea value={input} onChange={e => setInput(e.target.value)}
+              placeholder="I am so happy and grateful now that..."
+              style={{ ...s.textarea, minHeight: 100, flex: 1 }} />
+          </div>
+          <button onClick={setGoal} disabled={!input.trim()}
+            style={{ ...s.btnPrimary, width: '100%', opacity: input.trim() ? 1 : 0.3 }}>
+            Set My Goal
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// PARADIGM TRACKER (Bob Proctor)
+// ============================================================
+
+function ParadigmPage({ onBack }) {
+  const [paradigms, paraDb] = useSync('paradigms', 'paradigms')
+  const [oldBelief, setOldBelief] = useState('')
+  const [newBelief, setNewBelief] = useState('')
+  const mic1 = useSpeech((t) => setOldBelief(t))
+  const mic2 = useSpeech((t) => setNewBelief(t))
+  const shifting = paradigms.filter(p => p.status === 'shifting').length
+  const shifted = paradigms.filter(p => p.status === 'shifted').length
+
+  const add = () => {
+    if (!oldBelief.trim() || !newBelief.trim()) return
+    paraDb.add({ old_belief: oldBelief.trim(), new_belief: newBelief.trim(), status: 'shifting' })
+    setOldBelief(''); setNewBelief('')
+    mic1.stop(); mic2.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Paradigms</h1>
+        <p style={s.subtitle}>Bob Proctor — identify and shift your old programming</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "A paradigm is a multitude of habits. It controls your perception and your behavior. Change the paradigm and you change your life." — Bob Proctor
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{shifting}</div>
+          <div style={s.statUnit}>Shifting</div>
+        </div>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{shifted}</div>
+          <div style={s.statUnit}>Shifted ✦</div>
+        </div>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>OLD PARADIGM</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic1.listening} onPress={() => mic1.toggle(oldBelief)} />
+          <input value={oldBelief} onChange={e => setOldBelief(e.target.value)}
+            placeholder="I used to believe..." style={{ ...s.input, flex: 1 }} />
+        </div>
+        <div style={s.label}>NEW PARADIGM</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic2.listening} onPress={() => mic2.toggle(newBelief)} />
+          <input value={newBelief} onChange={e => setNewBelief(e.target.value)}
+            placeholder="I now know that..." style={{ ...s.input, flex: 1 }} />
+        </div>
+        <button onClick={add} disabled={!oldBelief.trim() || !newBelief.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: oldBelief.trim() && newBelief.trim() ? 1 : 0.3 }}>
+          Add Paradigm Shift
+        </button>
+      </div>
+
+      {paradigms.map(p => (
+        <div key={p.id} style={{ ...s.card, marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>{p.old_belief}</div>
+          <div style={{ fontSize: 15, color: '#fff', marginTop: 8 }}>→ {p.new_belief}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+            <span style={{ fontSize: 11, ...s.dim }}>{p.status === 'shifted' ? '✦ Shifted' : '⟳ Shifting'}</span>
+            {p.status === 'shifting' && (
+              <button onClick={() => paraDb.update(p.id, { status: 'shifted' })}
+                style={{ ...s.pill, fontSize: 11, padding: '6px 14px' }}>Mark as Shifted ✦</button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// TERROR BARRIER (Bob Proctor)
+// ============================================================
+
+function TerrorBarrierPage({ onBack }) {
+  const [barriers, barrierDb] = useSync('terror_barriers', 'terror_barriers')
+  const [barrier, setBarrier] = useState('')
+  const [feeling, setFeeling] = useState('')
+  const [breakthrough, setBreakthrough] = useState('')
+  const mic = useSpeech((t) => setBarrier(t))
+
+  const add = () => {
+    if (!barrier.trim()) return
+    barrierDb.add({ barrier: barrier.trim(), feeling: feeling.trim() || null, breakthrough: breakthrough.trim() || null })
+    setBarrier(''); setFeeling(''); setBreakthrough('')
+    mic.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Terror Barrier</h1>
+        <p style={s.subtitle}>Bob Proctor — the wall between you and your dream</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "When you step outside your comfort zone, the Terror Barrier hits. Most people retreat. The ones who push through — they're the ones who win." — Bob Proctor
+        </p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>THE RESISTANCE I'M HITTING</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(barrier)} />
+          <textarea value={barrier} onChange={e => setBarrier(e.target.value)}
+            placeholder="What's trying to stop me right now..."
+            style={{ ...s.textarea, minHeight: 70 }} />
+        </div>
+        <div style={s.label}>WHAT IT FEELS LIKE</div>
+        <input value={feeling} onChange={e => setFeeling(e.target.value)}
+          placeholder="Fear, doubt, anxiety..."
+          style={{ ...s.input, marginBottom: 12 }} />
+        <div style={s.label}>HOW I'LL BREAK THROUGH</div>
+        <input value={breakthrough} onChange={e => setBreakthrough(e.target.value)}
+          placeholder="I will push through by..."
+          style={{ ...s.input, marginBottom: 12 }} />
+        <button onClick={add} disabled={!barrier.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: barrier.trim() ? 1 : 0.3 }}>
+          Log This Barrier
+        </button>
+      </div>
+
+      <div style={s.label}>BARRIERS I'VE FACED ({barriers.length})</div>
+      {barriers.map(b => (
+        <div key={b.id} style={{ ...s.card, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, color: '#fff' }}>{b.barrier}</div>
+          {b.feeling && <div style={{ fontSize: 13, ...s.dim, marginTop: 6 }}>Felt: {b.feeling}</div>}
+          {b.breakthrough && <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 6 }}>→ {b.breakthrough}</div>}
+          <div style={{ fontSize: 10, ...s.dim, marginTop: 8 }}>{new Date(b.created_at).toLocaleDateString()}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// POWER OF INTENTION (Wayne Dyer)
+// ============================================================
+
+const INTENTION_SOURCES = ['Love', 'Creativity', 'Kindness', 'Beauty', 'Expansion', 'Abundance', 'Receptivity']
+
+function IntentionPage({ onBack }) {
+  const [intentions, intDb] = useSync('intentions', 'intentions')
+  const [intention, setIntention] = useState('')
+  const [source, setSource] = useState('')
+  const mic = useSpeech((t) => setIntention(t))
+  const today = new Date().toDateString()
+  const todaySet = intentions.some(i => new Date(i.created_at).toDateString() === today)
+
+  const set = () => {
+    if (!intention.trim()) return
+    intDb.add({ intention: intention.trim(), source: source || null })
+    setIntention(''); setSource('')
+    mic.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Intention</h1>
+        <p style={s.subtitle}>Wayne Dyer — connect to the source of all creation</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Intention is a force in the universe. When you're connected to the power of intention, everywhere you go and everyone you meet is affected by you and the energy you radiate." — Wayne Dyer
+        </p>
+      </div>
+
+      {todaySet && (
+        <div style={{ ...s.card, marginBottom: 14, textAlign: 'center', padding: '24px 20px', border: '1px solid rgba(255,255,255,0.15)' }}>
+          <div style={{ fontSize: 11, ...s.dim, marginBottom: 8 }}>TODAY'S INTENTION</div>
+          <p style={{ fontSize: 18, color: '#fff', lineHeight: 1.6 }}>{intentions[0]?.intention}</p>
+          {intentions[0]?.source && <div style={{ fontSize: 13, ...s.dim, marginTop: 10 }}>Source: {intentions[0].source}</div>}
+        </div>
+      )}
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>SET YOUR INTENTION</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>What energy do you want to move from today?</p>
+        <div style={s.label}>CONNECT TO SOURCE</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+          {INTENTION_SOURCES.map(src => (
+            <button key={src} onClick={() => setSource(src)}
+              style={{ ...s.pill, fontSize: 13, background: source === src ? 'rgba(255,255,255,0.1)' : 'transparent',
+                borderColor: source === src ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)', color: source === src ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+              {src}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(intention)} />
+          <textarea value={intention} onChange={e => setIntention(e.target.value)}
+            placeholder="Today I intend to..."
+            style={{ ...s.textarea, minHeight: 80 }} />
+        </div>
+        <button onClick={set} disabled={!intention.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: intention.trim() ? 1 : 0.3 }}>
+          Set Intention
+        </button>
+      </div>
+
+      {intentions.length > (todaySet ? 1 : 0) && (
+        <>
+          <div style={s.label}>PAST INTENTIONS</div>
+          {intentions.slice(todaySet ? 1 : 0, 15).map(i => (
+            <div key={i.id} style={{ ...s.card, marginBottom: 8 }}>
+              <div style={{ fontSize: 15, color: '#fff' }}>{i.intention}</div>
+              <div style={{ fontSize: 11, ...s.dim, marginTop: 6 }}>{i.source ? i.source + ' • ' : ''}{new Date(i.created_at).toLocaleDateString()}</div>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// WISHES FULFILLED (Wayne Dyer + Neville)
+// ============================================================
+
+function WishesFulfilledPage({ onBack }) {
+  const [wishes, wishDb] = useSync('wishes_fulfilled', 'wishes_fulfilled')
+  const [wish, setWish] = useState('')
+  const [feeling, setFeeling] = useState('')
+  const mic = useSpeech((t) => setWish(t))
+
+  const FEELINGS = ['Grateful', 'Peaceful', 'Joyful', 'Free', 'Loved', 'Abundant', 'Powerful', 'Complete']
+
+  const add = () => {
+    if (!wish.trim()) return
+    wishDb.add({ wish: wish.trim(), feeling: feeling || null })
+    setWish(''); setFeeling('')
+    mic.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Wishes Fulfilled</h1>
+        <p style={s.subtitle}>Wayne Dyer + Neville — fall asleep in the wish fulfilled</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Place your attention on what you intend to create. Stay in that feeling. Assume it is so. Fall asleep in that assumption." — Wayne Dyer, Wishes Fulfilled
+        </p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>TONIGHT'S BEDTIME PRACTICE</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 12 }}>Write what you want as if you already have it. What does your life look like? How does it feel?</p>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(wish)} />
+          <textarea value={wish} onChange={e => setWish(e.target.value)}
+            placeholder="I am so grateful that I now..."
+            style={{ ...s.textarea, minHeight: 100 }} />
+        </div>
+        <div style={s.label}>THE FEELING I FALL ASLEEP IN</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+          {FEELINGS.map(f => (
+            <button key={f} onClick={() => setFeeling(f)}
+              style={{ ...s.pill, fontSize: 13, background: feeling === f ? 'rgba(255,255,255,0.1)' : 'transparent',
+                borderColor: feeling === f ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)', color: feeling === f ? '#fff' : 'rgba(255,255,255,0.6)' }}>
+              {f}
+            </button>
+          ))}
+        </div>
+        <button onClick={add} disabled={!wish.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: wish.trim() ? 1 : 0.3 }}>
+          Seal Tonight's Wish ✦
+        </button>
+      </div>
+
+      {wishes.length > 0 && (
+        <>
+          <div style={s.label}>MY WISHES ({wishes.length})</div>
+          {wishes.slice(0, 15).map(w => (
+            <div key={w.id} style={{ ...s.card, marginBottom: 8 }}>
+              <div style={{ fontSize: 15, color: '#fff', lineHeight: 1.6 }}>{w.wish}</div>
+              <div style={{ fontSize: 12, ...s.dim, marginTop: 8 }}>{w.feeling ? 'Feeling: ' + w.feeling + ' • ' : ''}{new Date(w.created_at).toLocaleDateString()}</div>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// THE CERTAIN WAY (Wallace Wattles)
+// ============================================================
+
+function CertainWayPage({ onBack }) {
+  const [entries, cwDb] = useSync('certain_way', 'certain_way')
+  const [desire, setDesire] = useState('')
+  const [gratitude, setGratitude] = useState('')
+  const [faith, setFaith] = useState('')
+  const mic = useSpeech((t) => setDesire(t))
+
+  const add = () => {
+    if (!desire.trim()) return
+    cwDb.add({ desire: desire.trim(), gratitude_for: gratitude.trim() || null, faith_statement: faith.trim() || null })
+    setDesire(''); setGratitude(''); setFaith('')
+    mic.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>The Certain Way</h1>
+        <p style={s.subtitle}>Wallace Wattles — think in the Certain Way and create</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "There is a thinking stuff from which all things are made. A thought in this substance produces the thing that is imaged by the thought. To think in a Certain Way is to create." — Wallace Wattles
+        </p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>1. CLEAR DESIRE</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>What do you want? Be specific. See it clearly.</p>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(desire)} />
+          <textarea value={desire} onChange={e => setDesire(e.target.value)}
+            placeholder="I clearly see and want..."
+            style={{ ...s.textarea, minHeight: 70 }} />
+        </div>
+
+        <div style={s.label}>2. GRATITUDE</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>What are you grateful for related to this desire?</p>
+        <textarea value={gratitude} onChange={e => setGratitude(e.target.value)}
+          placeholder="I am grateful that..."
+          style={{ ...s.textarea, minHeight: 60, marginBottom: 16 }} />
+
+        <div style={s.label}>3. FAITH STATEMENT</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>State your absolute certainty that it is coming.</p>
+        <textarea value={faith} onChange={e => setFaith(e.target.value)}
+          placeholder="I know with absolute certainty that..."
+          style={{ ...s.textarea, minHeight: 60, marginBottom: 16 }} />
+
+        <button onClick={add} disabled={!desire.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: desire.trim() ? 1 : 0.3 }}>
+          Think in the Certain Way ✦
+        </button>
+      </div>
+
+      {entries.map(e => (
+        <div key={e.id} style={{ ...s.card, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, color: '#fff', lineHeight: 1.6 }}>{e.desire}</div>
+          {e.gratitude_for && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>Grateful: {e.gratitude_for}</div>}
+          {e.faith_statement && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>Faith: {e.faith_statement}</div>}
+          <div style={{ fontSize: 10, ...s.dim, marginTop: 8 }}>{new Date(e.created_at).toLocaleDateString()}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// IMPRESSION OF INCREASE (Wallace Wattles)
+// ============================================================
+
+function IncreasePage({ onBack }) {
+  const [log, logDb] = useSync('increase_log', 'increase_log')
+  const [input, setInput] = useState('')
+  const mic = useSpeech((t) => setInput(t))
+  const today = new Date().toDateString()
+  const todayCount = log.filter(l => new Date(l.created_at).toDateString() === today).length
+  const streak = (() => {
+    let count = 0
+    const d = new Date()
+    for (let i = 0; i < 30; i++) {
+      const dateStr = new Date(d - i * 86400000).toDateString()
+      if (log.some(l => new Date(l.created_at).toDateString() === dateStr)) count++
+      else if (i > 0) break
+    }
+    return count
+  })()
+
+  const add = () => {
+    if (!input.trim()) return
+    logDb.add({ act: input.trim() })
+    setInput(''); mic.stop()
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Increase</h1>
+        <p style={s.subtitle}>Wallace Wattles — give more value than you receive</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "Give everyone the impression of increase. Make everyone feel that they are more after having been with you." — Wallace Wattles
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{todayCount}</div>
+          <div style={s.statUnit}>Today</div>
+        </div>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{streak}</div>
+          <div style={s.statUnit}>Day Streak</div>
+        </div>
+        <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+          <div style={s.stat}>{log.length}</div>
+          <div style={s.statUnit}>All Time</div>
+        </div>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>LOG AN ACT OF INCREASE</div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>How did you give more value today? Where did you leave someone better than you found them?</p>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}
+            placeholder="I gave increase by..." style={{ ...s.input, flex: 1 }} />
+        </div>
+        <button onClick={add} disabled={!input.trim()}
+          style={{ ...s.btnPrimary, width: '100%', opacity: input.trim() ? 1 : 0.3 }}>
+          Log It ✦
+        </button>
+      </div>
+
+      {log.slice(0, 20).map(l => (
+        <div key={l.id} style={{ ...s.card, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, color: '#fff' }}>{l.act}</div>
+          <div style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{new Date(l.created_at).toLocaleDateString()}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ============================================================
+// GRATITUDE RAMPAGE (Wallace Wattles)
+// ============================================================
+
+function GratitudeRampagePage({ onBack }) {
+  const [rampages, rampageDb] = useSync('gratitude_rampage', 'gratitude_rampage')
+  const [active, setActive] = useState(false)
+  const [items, setItems] = useState([])
+  const [input, setInput] = useState('')
+  const [startTime, setStartTime] = useState(null)
+  const [elapsed, setElapsed] = useState(0)
+  const mic = useSpeech((t) => setInput(t))
+
+  useEffect(() => {
+    if (!active || !startTime) return
+    const iv = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000)
+    return () => clearInterval(iv)
+  }, [active, startTime])
+
+  const start = () => { setActive(true); setItems([]); setStartTime(Date.now()); setElapsed(0) }
+
+  const addItem = () => {
+    if (!input.trim()) return
+    setItems([...items, input.trim()])
+    setInput(''); mic.stop()
+  }
+
+  const finish = () => {
+    if (items.length === 0) return
+    rampageDb.add({ entries: JSON.stringify(items), duration: elapsed })
+    setActive(false); setItems([]); setStartTime(null)
+  }
+
+  const formatTime = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginTop: 16 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 8, marginBottom: 20 }}>
+        <h1 style={s.greeting}>Gratitude Rampage</h1>
+        <p style={s.subtitle}>Wallace Wattles — gratitude is the foundation of ALL creation</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "The grateful mind is constantly fixed upon the best. It tends to become the best. It takes the form of the best and will receive the best." — Wallace Wattles
+        </p>
+      </div>
+
+      {!active ? (
+        <>
+          <button onClick={start} style={{ ...s.btnPrimary, width: '100%', marginBottom: 14, padding: '22px 0' }}>
+            Start a Gratitude Rampage ✦
+          </button>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginBottom: 14, lineHeight: 1.7, padding: '0 20px' }}>
+            Go on a rampage of appreciation. List everything you're grateful for — big and small — as fast as you can. Don't stop. Don't filter. Let it pour out.
+          </p>
+        </>
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+            <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+              <div style={s.stat}>{items.length}</div>
+              <div style={s.statUnit}>Gratitudes</div>
+            </div>
+            <div style={{ ...s.card, flex: 1, textAlign: 'center' }}>
+              <div style={s.stat}>{formatTime(elapsed)}</div>
+              <div style={s.statUnit}>Time</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
+            <input value={input} onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addItem()}
+              placeholder="I'm grateful for..." style={{ ...s.input, flex: 1 }} autoFocus />
+            <button onClick={addItem} style={{ ...s.btnSecondary, flexShrink: 0 }}>+</button>
+          </div>
+
+          {items.map((item, i) => (
+            <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+              style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)' }}>✦ {item}</span>
+            </motion.div>
+          ))}
+
+          {items.length >= 3 && (
+            <button onClick={finish} style={{ ...s.btnPrimary, width: '100%', marginTop: 20 }}>
+              Finish Rampage ({items.length} gratitudes in {formatTime(elapsed)})
+            </button>
+          )}
+        </>
+      )}
+
+      {rampages.length > 0 && !active && (
+        <>
+          <div style={{ ...s.label, marginTop: 14 }}>PAST RAMPAGES ({rampages.length})</div>
+          {rampages.slice(0, 10).map(r => {
+            const parsed = (() => { try { return JSON.parse(r.entries) } catch { return [] } })()
+            return (
+              <div key={r.id} style={{ ...s.card, marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 15, color: '#fff' }}>✦ {parsed.length} gratitudes</span>
+                  <span style={{ fontSize: 12, ...s.dim }}>{r.duration ? formatTime(r.duration) : ''}</span>
+                </div>
+                <div style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{new Date(r.created_at).toLocaleDateString()}</div>
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 // AI COACH (Gemini)
 // ============================================================
 
@@ -3684,12 +4912,16 @@ Your personality:
 - You also draw from Bob Proctor and Wayne Dyer when relevant
 - You understand the neuroscience of cannabis withdrawal: dopamine recalibration, REM rebound, CB1 receptor upregulation, neuroplasticity
 - You're honest about the hard parts but always point toward the light
-- You keep responses concise — 2-4 sentences usually, unless they're asking for depth
+- You give FULL, THOUGHTFUL responses. Talk to them like a real person having a real conversation. Share insights, ask follow-up questions, make connections between what they've told you. Go DEEP.
+- Your responses should be at LEAST 4-6 sentences. If they share something meaningful, give them a full paragraph or two back. Really engage with what they said.
+- Ask follow-up questions to keep the conversation going. Be curious about them.
+- Reference specific things from their app data — their journal entries, their gratitude, their energy patterns. Show that you SEE them.
 - You never judge. You never lecture. You meet them where they are.
-- If they're struggling, you validate first, then redirect gently
-- If they're doing well, you celebrate genuinely
+- If they're struggling, you validate first, then go deep — explain what's happening in their brain, connect it to Neville, give them something real to hold onto
+- If they're doing well, you celebrate genuinely and help them anchor that feeling (as Neville teaches)
 - You use "you" not "we" — this is their journey
 - You can reference their quit date to calculate how far they've come
+- Think of yourself as their best friend who also happens to know neuroscience and Neville Goddard. Have a real conversation.
 
 Key context:
 - They quit weed on April 1, 2026 at 6:45 PM
@@ -3710,6 +4942,199 @@ function CoachPage({ onBack }) {
   const mic = useSpeech((t) => { setInput(t); spokenRef.current = true })
   const bottomRef = useRef(null)
   const daysSinceQuit = Math.floor((Date.now() - QUIT_DATE.getTime()) / 86400000)
+
+  // Save messages to Supabase
+  const saveToSupabase = async (msgs) => {
+    save('coach_messages', msgs)
+    const last = msgs[msgs.length - 1]
+    if (last) {
+      supabase.from('coach_messages').insert({
+        role: last.role, text: last.text, time: last.time,
+        session_id: load('coach_session', Date.now().toString())
+      }).then(() => {})
+    }
+  }
+
+  // Initialize session ID
+  useEffect(() => {
+    if (!load('coach_session', null)) save('coach_session', Date.now().toString())
+  }, [])
+
+  // Build a full journey snapshot — everything the user has done, summarized smartly
+  const getAppContext = async () => {
+    try {
+      const grab = async (t) => {
+        const { data } = await supabase.from(t).select('*').order('created_at', { ascending: false }).limit(50)
+        return data || []
+      }
+      const [gratitude, journal, energy, checkins, cravings, dreams, worries, bathroom, nutrition, runs, tasks, workTasks, health, sats, vizs, revisions, iamDecl, mentalDiet, paradigms, goalCards, terrorB, intentions, wishes, certainWay, increaseLog] = await Promise.all([
+        grab('gratitude'), grab('journal'), grab('energy_log'), grab('checkins'),
+        grab('craving_log'), grab('dreams'), grab('released_worries'), grab('bathroom_log'),
+        grab('nutrition'), grab('runs'), grab('tasks'), grab('work_tasks'),
+        grab('health_logs'), grab('sats_scenes'), grab('visualizations'),
+        grab('revisions'), grab('iam_declarations'), grab('mental_diet'),
+        grab('paradigms'), grab('goal_card'), grab('terror_barriers'),
+        grab('intentions'), grab('wishes_fulfilled'), grab('certain_way'), grab('increase_log')
+      ])
+      const waterRes = await supabase.from('water').select('*').order('date', { ascending: false }).limit(7)
+      const water = waterRes?.data || []
+
+      const lines = []
+
+      // Gratitude
+      if (gratitude.length) {
+        lines.push(`GRATITUDE (${gratitude.length} total): Most recent — ${gratitude.slice(0, 5).map(g => g.text).join('; ')}`)
+      }
+
+      // Journal — full recent entries, moods
+      if (journal.length) {
+        const moods = journal.filter(j => j.mood).map(j => j.mood)
+        const moodStr = moods.length ? ` Moods: ${[...new Set(moods)].join(', ')}.` : ''
+        lines.push(`JOURNAL (${journal.length} entries):${moodStr}`)
+        journal.slice(0, 3).forEach(j => {
+          lines.push(`  "${j.entry || j.text || j.content}" (${new Date(j.created_at).toLocaleDateString()}${j.mood ? ', ' + j.mood : ''})`)
+        })
+      }
+
+      // Energy
+      if (energy.length) {
+        const levels = energy.slice(0, 7).map(e => e.level).filter(Boolean)
+        lines.push(`ENERGY (${energy.length} logs): Recent levels — ${levels.join(', ')}`)
+      }
+
+      // Check-ins
+      if (checkins.length) {
+        const recent = checkins[0]
+        let ciStr = `CHECK-INS (${checkins.length} total): Latest`
+        if (recent.rating) ciStr += ` rated day ${recent.rating}/10`
+        if (recent.intention) ciStr += `, intention: "${recent.intention}"`
+        if (recent.win) ciStr += `, win: "${recent.win}"`
+        if (recent.release) ciStr += `, releasing: "${recent.release}"`
+        if (recent.energy) ciStr += `, energy: ${recent.energy}`
+        if (recent.sleep) ciStr += `, sleep: ${recent.sleep}`
+        lines.push(ciStr)
+      }
+
+      // Cravings
+      if (cravings.length) {
+        const resisted = cravings.filter(c => c.resisted !== false).length
+        lines.push(`CRAVINGS: ${cravings.length} logged, ${resisted} resisted. Recent notes: ${cravings.slice(0, 3).map(c => c.note || c.text || c.trigger || 'no note').join('; ')}`)
+      }
+
+      // Dreams
+      if (dreams.length) {
+        lines.push(`DREAMS (${dreams.length}): ${dreams.slice(0, 3).map(d => `"${(d.text || d.entry || d.content || '').slice(0, 100)}"`).join('; ')}`)
+      }
+
+      // Surrendered worries
+      if (worries.length) {
+        lines.push(`SURRENDERED TO GOD (${worries.length}): ${worries.slice(0, 5).map(w => w.text || w.worry || w.content).join('; ')}`)
+      }
+
+      // Water
+      if (water.length) {
+        lines.push(`WATER: ${water.map(w => `${w.date}: ${w.glasses} glasses`).join(', ')}`)
+      }
+
+      // Bathroom
+      if (bathroom.length) {
+        lines.push(`BATHROOM: ${bathroom.length} entries logged`)
+      }
+
+      // Nutrition
+      if (nutrition.length) {
+        lines.push(`NUTRITION (${nutrition.length}): ${nutrition.slice(0, 3).map(n => n.text || n.meal || n.entry || '').join('; ')}`)
+      }
+
+      // Runs
+      if (runs.length) {
+        lines.push(`RUNS (${runs.length}): ${runs.slice(0, 3).map(r => `${r.distance ? r.distance + ' mi' : ''} ${r.duration ? r.duration + ' min' : ''}`).join('; ')}`)
+      }
+
+      // Tasks
+      if (tasks.length) {
+        const done = tasks.filter(t => t.done).length
+        lines.push(`TASKS: ${done}/${tasks.length} completed`)
+      }
+
+      // Work tasks
+      if (workTasks.length) {
+        const done = workTasks.filter(t => t.done).length
+        lines.push(`WORK TASKS: ${done}/${workTasks.length} completed. Recent: ${workTasks.slice(0, 3).map(t => `${t.text}${t.done ? ' ✓' : ''}`).join(', ')}`)
+      }
+
+      // Health
+      if (health.length) {
+        lines.push(`HEALTH LOGS (${health.length}): ${health.slice(0, 2).map(h => `${h.mood || ''} energy:${h.energy || ''} sleep:${h.sleep || ''}`).join('; ')}`)
+      }
+
+      // SATS
+      if (sats.length) {
+        lines.push(`SATS SCENES (${sats.length}): ${sats.slice(0, 2).map(s => `"${(s.scene || s.text || '').slice(0, 80)}"`).join('; ')}`)
+      }
+
+      // Visualizations
+      if (vizs.length) {
+        lines.push(`VISUALIZATIONS (${vizs.length}): ${vizs.slice(0, 2).map(v => `"${(v.text || v.scene || v.content || '').slice(0, 80)}"`).join('; ')}`)
+      }
+
+      // Revisions (Neville)
+      if (revisions.length) {
+        lines.push(`REVISIONS (${revisions.length}): ${revisions.slice(0, 2).map(r => `Original: "${(r.original || '').slice(0, 60)}" → Revised: "${(r.revised || '').slice(0, 60)}"`).join('; ')}`)
+      }
+
+      // I AM Declarations
+      if (iamDecl.length) {
+        lines.push(`I AM DECLARATIONS (${iamDecl.length}): ${iamDecl.map(d => d.text).join('; ')}`)
+      }
+
+      // Mental Diet
+      if (mentalDiet.length) {
+        lines.push(`MENTAL DIET (${mentalDiet.length} thoughts caught): ${mentalDiet.slice(0, 3).map(m => `"${m.thought}" → "${m.replacement || 'no replacement'}"`).join('; ')}`)
+      }
+
+      // Paradigms
+      if (paradigms.length) {
+        const shifted = paradigms.filter(p => p.status === 'shifted').length
+        lines.push(`PARADIGMS (${paradigms.length}, ${shifted} shifted): ${paradigms.slice(0, 3).map(p => `"${p.old_belief}" → "${p.new_belief}" (${p.status})`).join('; ')}`)
+      }
+
+      // Goal Card
+      if (goalCards.length) {
+        lines.push(`GOAL CARD: "${goalCards[0].goal}" (read ${goalCards[0].read_count || 0} times)`)
+      }
+
+      // Terror Barriers
+      if (terrorB.length) {
+        lines.push(`TERROR BARRIERS (${terrorB.length}): ${terrorB.slice(0, 2).map(t => `"${t.barrier}"${t.breakthrough ? ' → ' + t.breakthrough : ''}`).join('; ')}`)
+      }
+
+      // Intentions (Wayne Dyer)
+      if (intentions.length) {
+        lines.push(`INTENTIONS (${intentions.length}): Latest: "${intentions[0].intention}"${intentions[0].source ? ' (Source: ' + intentions[0].source + ')' : ''}`)
+      }
+
+      // Wishes Fulfilled
+      if (wishes.length) {
+        lines.push(`WISHES FULFILLED (${wishes.length}): ${wishes.slice(0, 2).map(w => `"${(w.wish || '').slice(0, 80)}" feeling: ${w.feeling || 'unset'}`).join('; ')}`)
+      }
+
+      // The Certain Way
+      if (certainWay.length) {
+        lines.push(`CERTAIN WAY (${certainWay.length}): ${certainWay.slice(0, 2).map(c => `Desire: "${(c.desire || '').slice(0, 60)}"`).join('; ')}`)
+      }
+
+      // Impression of Increase
+      if (increaseLog.length) {
+        lines.push(`IMPRESSION OF INCREASE (${increaseLog.length} acts): ${increaseLog.slice(0, 3).map(i => i.act).join('; ')}`)
+      }
+
+      return lines.join('\n')
+    } catch (e) {
+      console.error('Context fetch error:', e)
+      return ''
+    }
+  }
 
   const speak = (text) => {
     if (!('speechSynthesis' in window)) return
@@ -3738,33 +5163,43 @@ function CoachPage({ onBack }) {
     const userMsg = { role: 'user', text: input.trim(), time: Date.now() }
     const updated = [...messages, userMsg]
     setMessages(updated)
-    save('coach_messages', updated)
+    saveToSupabase(updated)
     setInput('')
     setLoading(true)
 
     try {
-      const contents = [
-        { role: 'user', parts: [{ text: COACH_SYSTEM + '\n\nThe user is on Day ' + daysSinceQuit + ' of their recovery. Current time: ' + new Date().toLocaleString() }] },
-        { role: 'model', parts: [{ text: 'I understand. I\'m here as their recovery coach, grounded in Neville Goddard\'s teachings and neuroscience. Ready to support them.' }] },
-        ...updated.map(m => ({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.text }]
-        }))
-      ]
+      // Fetch all app data for context
+      const appContext = await getAppContext()
+      const contextBlock = appContext ? `\n\n--- USER'S RECENT APP ACTIVITY ---${appContext}\n--- END ACTIVITY ---\n\nUse this data to personalize your responses. Reference specific things they've written, patterns you notice, and their progress. Don't list it back — weave it naturally into your coaching.` : ''
+
+      // Send last 20 messages for good conversation memory
+      const recentMsgs = updated.slice(-20)
+
+      const systemText = COACH_SYSTEM + contextBlock + '\n\nThe user is on Day ' + daysSinceQuit + ' of their recovery. Current time: ' + new Date().toLocaleString()
+
+      const contents = recentMsgs.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }))
 
       const res = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: 300, temperature: 0.8 } })
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemText }] },
+          contents,
+          generationConfig: { maxOutputTokens: 2000, temperature: 0.85 }
+        })
       })
 
       const data = await res.json()
+      if (data?.error) console.error('Gemini error:', data.error)
       const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'I\'m here with you. Tell me more about what you\'re feeling.'
 
       const coachMsg = { role: 'coach', text: reply, time: Date.now() }
       const final = [...updated, coachMsg]
       setMessages(final)
-      save('coach_messages', final)
+      saveToSupabase(final)
 
       // Only speak back if user used voice
       if (wasSpoken) speak(reply)
@@ -3772,7 +5207,7 @@ function CoachPage({ onBack }) {
       const errMsg = { role: 'coach', text: 'I\'m having trouble connecting right now. But I\'m still here — try again in a moment.', time: Date.now() }
       const final = [...updated, errMsg]
       setMessages(final)
-      save('coach_messages', final)
+      saveToSupabase(final)
     }
 
     setLoading(false)
@@ -3786,6 +5221,9 @@ function CoachPage({ onBack }) {
     stopSpeaking()
     setMessages([])
     save('coach_messages', [])
+    // Start a new session
+    const newSession = Date.now().toString()
+    save('coach_session', newSession)
   }
 
   return (
