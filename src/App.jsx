@@ -173,6 +173,58 @@ function useSync(table, localKey, fallback = []) {
   return [data, { add, remove, update, replace, setData }]
 }
 
+// Speech-to-text hook — reusable across all inputs
+function useSpeech(onResult) {
+  const [listening, setListening] = useState(false)
+  const recRef = useRef(null)
+
+  const toggle = (currentText = '') => {
+    if (listening) {
+      recRef.current?.stop()
+      setListening(false)
+      return
+    }
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Speech recognition not supported in this browser'); return }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    const rec = new SR()
+    rec.continuous = true
+    rec.interimResults = true
+    rec.onresult = (ev) => {
+      let t = currentText ? currentText + ' ' : ''
+      for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript
+      onResult(t)
+    }
+    rec.onerror = () => setListening(false)
+    rec.onend = () => setListening(false)
+    recRef.current = rec
+    rec.start()
+    setListening(true)
+  }
+
+  const stop = () => { recRef.current?.stop(); setListening(false) }
+
+  useEffect(() => () => { recRef.current?.stop() }, [])
+
+  return { listening, toggle, stop }
+}
+
+// Mic button component
+function MicBtn({ listening, onPress, small }) {
+  return (
+    <button onClick={onPress} type="button"
+      style={{ background: listening ? 'rgba(255,100,100,0.12)' : 'rgba(255,255,255,0.04)',
+        border: listening ? '1px solid rgba(255,100,100,0.25)' : '1px solid rgba(255,255,255,0.08)',
+        borderRadius: small ? 8 : 10, padding: small ? '6px 8px' : '10px 12px', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0 }}>
+      <svg width={small ? 14 : 16} height={small ? 14 : 16} viewBox="0 0 24 24" fill="none"
+        stroke={listening ? 'rgba(255,100,100,0.8)' : 'rgba(255,255,255,0.4)'} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="9" y="1" width="6" height="14" rx="3" />
+        <path d="M19 10v1a7 7 0 01-14 0v-1M12 18.5V23M8 23h8" />
+      </svg>
+    </button>
+  )
+}
+
 // Audio
 class Ambient {
   constructor() { this.ctx = null; this.nodes = []; this.on = false }
@@ -626,27 +678,15 @@ function BrainPage({ time, onBack }) {
 function SATSPage() {
   const [scenes, satsDb] = useSync('sats_scenes', 'sats_scenes')
   const [input, setInput] = useState('')
-  const [recording, setRecording] = useState(false)
   const [nightMode, setNightMode] = useState(false)
   const [soundOn, setSoundOn] = useState(false)
   const [selectedSound, setSelectedSound] = useState(TIMER_SOUNDS[0])
-  const recRef = useRef(null)
-
-  const startRec = () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Speech recognition not supported'); return }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    recRef.current = new SR(); recRef.current.continuous = true; recRef.current.interimResults = true
-    recRef.current.onresult = (ev) => { let t = ''; for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript; setInput(t) }
-    recRef.current.start(); setRecording(true)
-  }
-
-  const stopRec = () => { recRef.current?.stop(); setRecording(false) }
+  const mic = useSpeech(setInput)
 
   const saveScene = () => {
     if (!input.trim()) return
-    const scene = { content: input, type: recording ? 'spoken' : 'written' }
-    satsDb.add(scene); setInput('')
-    if (recording) stopRec()
+    satsDb.add({ content: input, type: mic.listening ? 'spoken' : 'written' }); setInput('')
+    mic.stop()
   }
 
   const delScene = (id) => {
@@ -686,10 +726,7 @@ function SATSPage() {
           />
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 24 }}>
-            <button onClick={recording ? stopRec : startRec}
-              style={{ ...s.btnSecondary, padding: '12px 20px', ...(recording ? { background: 'rgba(255,100,100,0.1)', borderColor: 'rgba(255,100,100,0.2)' } : {}) }}>
-              {recording ? 'Stop' : 'Speak It'}
-            </button>
+            <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
             {input.trim() && (
               <button onClick={saveScene} style={{ ...s.btnSecondary, padding: '12px 20px' }}>Save Scene</button>
             )}
@@ -785,10 +822,7 @@ function SATSPage() {
           placeholder="Describe your scene in present tense... what do you see, hear, feel?"
           style={s.textarea} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-          <button onClick={recording ? stopRec : startRec}
-            style={{ ...s.btnSecondary, ...(recording ? { background: 'rgba(255,100,100,0.1)', borderColor: 'rgba(255,100,100,0.2)' } : {}) }}>
-            {recording ? 'Stop' : 'Speak It'}
-          </button>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
           <button onClick={saveScene} style={s.btnSecondary}>Save Scene</button>
         </div>
       </div>
@@ -840,6 +874,8 @@ function DreamsPage({ onBack }) {
   const [chatMode, setChatMode] = useState(false)
   const [chats, chatsDb] = useSync('dream_chats', 'dreamchats')
   const [chatIn, setChatIn] = useState('')
+  const dreamMic = useSpeech(setInput)
+  const chatMic = useSpeech(setChatIn)
 
   const addDream = () => {
     if (!input.trim()) return
@@ -902,6 +938,7 @@ function DreamsPage({ onBack }) {
           <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <input value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendChat()}
               placeholder="Tell me about your dream..." style={{ ...s.input, flex: 1 }} />
+            <MicBtn listening={chatMic.listening} onPress={() => chatMic.toggle(chatIn)} small />
             <button onClick={sendChat} style={{ ...s.btnSecondary, padding: '10px 14px' }}>
               <span style={{ color: '#fff' }}>{Icons.send}</span>
             </button>
@@ -915,7 +952,10 @@ function DreamsPage({ onBack }) {
               style={s.textarea} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
               <span style={{ fontSize: 10, ...s.dim }}>{dreams.length} dreams recorded</span>
-              <button onClick={addDream} style={s.btnSecondary}>Save Dream</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <MicBtn listening={dreamMic.listening} onPress={() => dreamMic.toggle(input)} small />
+                <button onClick={addDream} style={s.btnSecondary}>Save Dream</button>
+              </div>
             </div>
           </div>
 
@@ -950,6 +990,7 @@ function NutritionPage({ onBack }) {
   const [input, setInput] = useState('')
   const [found, setFound] = useState(null)
   const [show, setShow] = useState(false)
+  const mic = useSpeech(setInput)
 
   const log = (text, foodData) => {
     const f = foodData || findFood(text)
@@ -983,6 +1024,7 @@ function NutritionPage({ onBack }) {
         <div style={{ display: 'flex', gap: 8 }}>
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && log(input)}
             placeholder="I had broccoli and salmon..." style={{ ...s.input, flex: 1 }} />
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} small />
           <button onClick={() => log(input)} style={s.btnSecondary}>Log</button>
         </div>
       </div>
@@ -1166,6 +1208,7 @@ function WaterPage({ onBack }) {
 function GratitudePage({ onBack }) {
   const [entries, gratDb] = useSync('gratitude', 'gratitude')
   const [input, setInput] = useState('')
+  const mic = useSpeech(setInput)
 
   const add = () => {
     if (!input.trim()) return
@@ -1202,7 +1245,10 @@ function GratitudePage({ onBack }) {
           placeholder="I am grateful for..." rows={3} style={s.textarea} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
           <span style={{ fontSize: 10, ...s.dim }}>{entries.length} moments of gratitude</span>
-          <button onClick={add} style={s.btnSecondary}>Give Thanks</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} small />
+            <button onClick={add} style={s.btnSecondary}>Give Thanks</button>
+          </div>
         </div>
       </div>
 
@@ -1313,22 +1359,12 @@ function VisionPage({ images, setImages, onBack }) {
 function VisualizePage({ onBack }) {
   const [vizs, vizDb] = useSync('visualizations', 'visualizations')
   const [input, setInput] = useState('')
-  const [recording, setRecording] = useState(false)
-  const recRef = useRef(null)
-
-  const startRec = () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Speech recognition not supported'); return }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    recRef.current = new SR(); recRef.current.continuous = true; recRef.current.interimResults = true
-    recRef.current.onresult = (ev) => { let t = ''; for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript; setInput(t) }
-    recRef.current.start(); setRecording(true)
-  }
-
-  const stopRec = () => { recRef.current?.stop(); setRecording(false) }
+  const mic = useSpeech(setInput)
 
   const saveViz = () => {
     if (!input.trim()) return
-    vizDb.add({ content: input, type: recording ? 'spoken' : 'written' }); setInput('')
+    vizDb.add({ content: input, type: mic.listening ? 'spoken' : 'written' }); setInput('')
+    mic.stop()
   }
 
   const delViz = (id) => {
@@ -1360,10 +1396,7 @@ function VisualizePage({ onBack }) {
           placeholder="Write your visualization scene... present tense, as if it's already real. What do you see? How does it feel?"
           style={s.textarea} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-          <button onClick={recording ? stopRec : startRec}
-            style={{ ...s.btnSecondary, opacity: recording ? 1 : 0.6, ...(recording ? { background: 'rgba(255,100,100,0.15)', borderColor: 'rgba(255,100,100,0.3)' } : {}) }}>
-            {recording ? 'Stop Recording' : 'Speak It'}
-          </button>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} />
           <button onClick={saveViz} style={s.btnSecondary}>Save Scene</button>
         </div>
       </div>
@@ -1502,6 +1535,7 @@ function HealthPage({ onBack }) {
   const [steps, setSteps] = useState('')
   const [calories, setCalories] = useState('')
   const [notes, setNotes] = useState('')
+  const mic = useSpeech(setNotes)
 
   const logIt = () => {
     healthDb.add({
@@ -1604,7 +1638,10 @@ function HealthPage({ onBack }) {
 
       {/* Notes */}
       <div style={{ ...s.card, marginBottom: 14 }}>
-        <div style={{ fontSize: 12, ...s.mid, marginBottom: 8 }}>Notes</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, ...s.mid }}>Notes</div>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(notes)} small />
+        </div>
         <textarea value={notes} onChange={e => setNotes(e.target.value)}
           placeholder="How is your body feeling today?"
           rows={3} style={s.textarea} />
@@ -1863,7 +1900,8 @@ function WorkTimerPage() {
 function TasksPage({ onBack }) {
   const [tasks, tasksDb] = useSync('tasks', 'tasks')
   const [input, setInput] = useState('')
-  const [filter, setFilter] = useState('active') // active, completed, all
+  const [filter, setFilter] = useState('active')
+  const mic = useSpeech(setInput)
 
   const addTask = () => {
     if (!input.trim()) return
@@ -1901,6 +1939,7 @@ function TasksPage({ onBack }) {
           onKeyDown={e => e.key === 'Enter' && addTask()}
           placeholder="What needs to be done?"
           style={{ ...s.input, flex: 1 }} />
+        <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} small />
         <button onClick={addTask}
           style={{ ...s.btnSecondary, padding: '14px 20px', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
           Add
@@ -1969,6 +2008,7 @@ function CravingsPage({ onBack }) {
   const [cravingLog, cravingDb] = useSync('craving_log', 'craving_log')
   const [justResisted, setJustResisted] = useState(false)
   const [note, setNote] = useState('')
+  const mic = useSpeech(setNote)
 
   const todayCount = cravingLog.filter(e => new Date(e.created_at || e.date).toDateString() === today).length
   const totalResisted = cravingLog.length
@@ -2005,9 +2045,12 @@ function CravingsPage({ onBack }) {
           Want to drink water, chew something, smoke — anything. Press the button instead.
         </p>
 
-        <input value={note} onChange={e => setNote(e.target.value)}
-          placeholder="What are you craving? (optional)"
-          style={{ ...s.input, marginBottom: 16, textAlign: 'center' }} />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, justifyContent: 'center' }}>
+          <input value={note} onChange={e => setNote(e.target.value)}
+            placeholder="What are you craving? (optional)"
+            style={{ ...s.input, textAlign: 'center', flex: 1 }} />
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(note)} small />
+        </div>
 
         <button onClick={resist}
           style={{ width: 100, height: 100, borderRadius: '50%', border: justResisted ? '2px solid rgba(255,255,255,0.3)' : '2px solid rgba(255,255,255,0.1)',
