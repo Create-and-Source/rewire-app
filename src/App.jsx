@@ -224,10 +224,100 @@ const Icons = {
 }
 
 // ============================================================
+// PASSCODE GATE
+// ============================================================
+
+const PASSCODE = '55555'
+
+function PasscodeScreen({ onUnlock }) {
+  const [code, setCode] = useState('')
+  const [shake, setShake] = useState(false)
+  const [dots, setDots] = useState([false, false, false, false, false])
+
+  const press = (num) => {
+    if (code.length >= 5) return
+    const next = code + num
+    const nextDots = dots.map((_, i) => i < next.length)
+    setCode(next)
+    setDots(nextDots)
+
+    if (next.length === 5) {
+      if (next === PASSCODE) {
+        setTimeout(() => onUnlock(), 200)
+      } else {
+        setShake(true)
+        setTimeout(() => { setCode(''); setDots([false, false, false, false, false]); setShake(false) }, 500)
+      }
+    }
+  }
+
+  const del = () => {
+    if (!code.length) return
+    const next = code.slice(0, -1)
+    setCode(next)
+    setDots(dots.map((_, i) => i < next.length))
+  }
+
+  const numPad = [[1,2,3],[4,5,6],[7,8,9],[null,0,'del']]
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0D0D0D', padding: 20 }}>
+      <div style={{ marginBottom: 8 }}>
+        <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)' }}>REWIRE</span>
+      </div>
+
+      <p style={{ fontSize: 14, fontWeight: 300, color: 'rgba(255,255,255,0.5)', marginBottom: 40 }}>Enter passcode</p>
+
+      <motion.div animate={shake ? { x: [-12, 12, -8, 8, -4, 4, 0] } : {}} transition={{ duration: 0.4 }}
+        style={{ display: 'flex', gap: 14, marginBottom: 48 }}>
+        {dots.map((filled, i) => (
+          <motion.div key={i} animate={{ scale: filled ? [1, 1.2, 1] : 1 }} transition={{ duration: 0.15 }}
+            style={{ width: 14, height: 14, borderRadius: '50%',
+              border: '1.5px solid rgba(255,255,255,0.2)',
+              background: filled ? '#fff' : 'transparent',
+              transition: 'background 0.15s' }} />
+        ))}
+      </motion.div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 280, width: '100%' }}>
+        {numPad.map((row, ri) => (
+          <div key={ri} style={{ display: 'flex', justifyContent: 'center', gap: 24 }}>
+            {row.map((key, ki) => (
+              key === null ? <div key={ki} style={{ width: 68, height: 68 }} /> :
+              key === 'del' ? (
+                <button key={ki} onClick={del}
+                  style={{ width: 68, height: 68, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500, fontFamily: 'Inter' }}>
+                  Delete
+                </button>
+              ) : (
+                <button key={ki} onClick={() => press(key)}
+                  style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 24, fontWeight: 300, color: '#fff', fontFamily: 'Inter',
+                    transition: 'all 0.15s' }}>
+                  {key}
+                </button>
+              )
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 40, fontStyle: 'italic' }}>
+        "{NEVILLE_QUOTES[Math.floor(Date.now() / 86400000) % NEVILLE_QUOTES.length]}"
+      </p>
+    </div>
+  )
+}
+
+// ============================================================
 // MAIN APP
 // ============================================================
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState(false)
   const [page, setPage] = useState('home')
   const [time, setTime] = useState(getTimeSince())
   const [quote, setQuote] = useState(NEVILLE_QUOTES[Math.floor(Math.random() * NEVILLE_QUOTES.length)])
@@ -237,6 +327,8 @@ export default function App() {
   useEffect(() => { const i = setInterval(() => setTime(getTimeSince()), 1000); return () => clearInterval(i) }, [])
   useEffect(() => { const i = setInterval(() => setQuote(NEVILLE_QUOTES[Math.floor(Math.random() * NEVILLE_QUOTES.length)]), 45000); return () => clearInterval(i) }, [])
   useEffect(() => { if (!visionImages.length) return; const i = setInterval(() => setBgIdx(v => (v + 1) % visionImages.length), 15000); return () => clearInterval(i) }, [visionImages.length])
+
+  if (!unlocked) return <PasscodeScreen onUnlock={() => setUnlocked(true)} />
 
   const bgImg = visionImages[bgIdx]?.url
 
