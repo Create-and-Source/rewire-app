@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://ibthbzgvibixjdvjaouj.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGhiemd2aWJpeGpkdmphb3VqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTc3NzQsImV4cCI6MjA5MDY3Mzc3NH0.5f-F_VK13-IgKeeFQyUUYNCEE5vIIv-O_wQ6w0RYyEg'
+)
 
 // ============================================================
 // CONSTANTS & DATA
@@ -130,6 +136,42 @@ const save = (k, d) => localStorage.setItem(`rw_${k}`, JSON.stringify(d))
 const fmtDate = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 const fmtTime = d => new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 const findFood = (input) => { const l = input.toLowerCase(); for (const [f, d] of Object.entries(FOOD_BENEFITS)) { if (l.includes(f)) return { food: f, ...d } } return null }
+
+// Supabase sync hook — localStorage for instant load, Supabase for persistence
+function useSync(table, localKey, fallback = []) {
+  const [data, setData] = useState(load(localKey, fallback))
+
+  useEffect(() => {
+    supabase.from(table).select('*').order('created_at', { ascending: false })
+      .then(({ data: rows }) => {
+        if (rows && rows.length) { setData(rows); save(localKey, rows) }
+      })
+  }, [table, localKey])
+
+  const add = async (row) => {
+    const { data: inserted } = await supabase.from(table).insert(row).select()
+    const newRow = inserted?.[0] || { ...row, id: Date.now() }
+    const updated = [newRow, ...data]
+    setData(updated); save(localKey, updated)
+    return newRow
+  }
+
+  const remove = async (id) => {
+    supabase.from(table).delete().eq('id', id).then(() => {})
+    const updated = data.filter(x => x.id !== id)
+    setData(updated); save(localKey, updated)
+  }
+
+  const update = async (id, changes) => {
+    supabase.from(table).update(changes).eq('id', id).then(() => {})
+    const updated = data.map(x => x.id === id ? { ...x, ...changes } : x)
+    setData(updated); save(localKey, updated)
+  }
+
+  const replace = (newData) => { setData(newData); save(localKey, newData) }
+
+  return [data, { add, remove, update, replace, setData }]
+}
 
 // Audio
 class Ambient {
@@ -327,6 +369,10 @@ export default function App() {
   useEffect(() => { const i = setInterval(() => setTime(getTimeSince()), 1000); return () => clearInterval(i) }, [])
   useEffect(() => { const i = setInterval(() => setQuote(NEVILLE_QUOTES[Math.floor(Math.random() * NEVILLE_QUOTES.length)]), 45000); return () => clearInterval(i) }, [])
   useEffect(() => { if (!visionImages.length) return; const i = setInterval(() => setBgIdx(v => (v + 1) % visionImages.length), 15000); return () => clearInterval(i) }, [visionImages.length])
+  useEffect(() => {
+    supabase.from('vision_images').select('*').order('created_at', { ascending: false })
+      .then(({ data: rows }) => { if (rows?.length) { setVisionImages(rows); save('vision', rows) } })
+  }, [])
 
   if (!unlocked) return <PasscodeScreen onUnlock={() => setUnlocked(true)} />
 
@@ -362,7 +408,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams','nourish'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -405,13 +451,14 @@ function HomePage({ time, quote, setPage }) {
   const { cur, nxt } = getMilestone(time.totalHours)
   const pct = nxt ? Math.min(100, ((time.totalHours - cur.hours) / (nxt.hours - cur.hours)) * 100) : 100
   const today = new Date().toDateString()
-  const [cravings, setCravings] = useState(load(`cravings_${today}`, 0))
-  const [totalResisted, setTotalResisted] = useState(load('total_resisted', 0))
+  const [cravingLog, cravingDb] = useSync('craving_log', 'craving_log')
   const [justResisted, setJustResisted] = useState(false)
 
+  const cravings = cravingLog.filter(e => new Date(e.created_at || e.date).toDateString() === today).length
+  const totalResisted = cravingLog.length
+
   const resistCraving = () => {
-    const c = cravings + 1; setCravings(c); save(`cravings_${today}`, c)
-    const t = totalResisted + 1; setTotalResisted(t); save('total_resisted', t)
+    cravingDb.add({ note: null })
     setJustResisted(true); setTimeout(() => setJustResisted(false), 2000)
   }
 
@@ -568,7 +615,7 @@ function BrainPage({ time, onBack }) {
 // ============================================================
 
 function SATSPage() {
-  const [scenes, setScenes] = useState(load('sats_scenes', []))
+  const [scenes, satsDb] = useSync('sats_scenes', 'sats_scenes')
   const [input, setInput] = useState('')
   const [recording, setRecording] = useState(false)
   const [nightMode, setNightMode] = useState(false)
@@ -588,14 +635,14 @@ function SATSPage() {
 
   const saveScene = () => {
     if (!input.trim()) return
-    const scene = { id: Date.now(), text: input, date: new Date().toISOString(), type: recording ? 'spoken' : 'written' }
-    const u = [scene, ...scenes]; setScenes(u); save('sats_scenes', u); setInput('')
+    const scene = { content: input, type: recording ? 'spoken' : 'written' }
+    satsDb.add(scene); setInput('')
     if (recording) stopRec()
   }
 
   const delScene = (id) => {
     if (!confirm('Are you sure you want to delete this scene?')) return
-    const u = scenes.filter(x => x.id !== id); setScenes(u); save('sats_scenes', u)
+    satsDb.remove(id)
   }
 
   const enterNight = () => {
@@ -665,7 +712,7 @@ function SATSPage() {
               <div style={{ fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.15)', marginBottom: 12, textAlign: 'center' }}>RECENT SCENES</div>
               {scenes.slice(0, 3).map(sc => (
                 <div key={sc.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', lineHeight: 1.6 }}>"{sc.text.slice(0, 120)}{sc.text.length > 120 ? '...' : ''}"</p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', lineHeight: 1.6 }}>"{(sc.content || sc.text).slice(0, 120)}{(sc.content || sc.text).length > 120 ? '...' : ''}"</p>
                 </div>
               ))}
             </div>
@@ -754,11 +801,11 @@ function SATSPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 10, ...s.dim }}>{sc.type === 'spoken' ? '🎙' : '✎'}</span>
-                  <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(sc.date)} · {fmtTime(sc.date)}</span>
+                  <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(sc.created_at || sc.date)} · {fmtTime(sc.created_at || sc.date)}</span>
                 </div>
                 <button onClick={() => delScene(sc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.1)' }}>{Icons.trash}</button>
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontStyle: 'italic' }}>"{sc.text}"</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontStyle: 'italic' }}>"{sc.content || sc.text}"</div>
             </div>
           ))}
         </>
@@ -779,24 +826,23 @@ function SATSPage() {
 // ============================================================
 
 function DreamsPage({ onBack }) {
-  const [dreams, setDreams] = useState(load('dreams', []))
+  const [dreams, dreamsDb] = useSync('dreams', 'dreams')
   const [input, setInput] = useState('')
   const [chatMode, setChatMode] = useState(false)
-  const [chats, setChats] = useState(load('dreamchats', []))
+  const [chats, chatsDb] = useSync('dream_chats', 'dreamchats')
   const [chatIn, setChatIn] = useState('')
 
   const addDream = () => {
     if (!input.trim()) return
-    const d = [{ id: Date.now(), text: input, date: new Date().toISOString() }, ...dreams]
-    setDreams(d); save('dreams', d); setInput('')
+    dreamsDb.add({ text: input }); setInput('')
   }
 
   const delDream = (id) => {
     if (!confirm('Are you sure you want to delete this dream?')) return
-    const d = dreams.filter(x => x.id !== id); setDreams(d); save('dreams', d)
+    dreamsDb.remove(id)
   }
 
-  const sendChat = () => {
+  const sendChat = async () => {
     if (!chatIn.trim()) return
     const responses = [
       `That's beautiful. Your subconscious is communicating — this is exactly the kind of dream processing that happens during REM rebound. You've logged ${dreams.length} dreams so far, each one a window into your healing.`,
@@ -805,8 +851,9 @@ function DreamsPage({ onBack }) {
       `Your subconscious is reorganizing — sorting through old files, making new connections, building the neural architecture for who you're becoming. As Neville said, "Imagination is the beginning of creation."`,
       `Dream journaling during recovery is powerful — it strengthens the bridge between your conscious and subconscious mind. You have ${dreams.length} entries now — that's ${dreams.length} conversations with your deeper self.`,
     ]
-    const u = [...chats, { role: 'user', text: chatIn, time: new Date().toISOString() }, { role: 'ai', text: responses[Math.floor(Math.random() * responses.length)], time: new Date().toISOString() }]
-    setChats(u); save('dreamchats', u); setChatIn('')
+    await chatsDb.add({ role: 'user', content: chatIn })
+    await chatsDb.add({ role: 'ai', content: responses[Math.floor(Math.random() * responses.length)] })
+    setChatIn('')
   }
 
   return (
@@ -839,7 +886,7 @@ function DreamsPage({ onBack }) {
                   maxWidth: '80%', padding: '10px 14px', borderRadius: 14, fontSize: 12, lineHeight: 1.6,
                   background: m.role === 'user' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
                   color: m.role === 'user' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.5)',
-                }}>{m.text}</div>
+                }}>{m.content || m.text}</div>
               </div>
             ))}
           </div>
@@ -866,7 +913,7 @@ function DreamsPage({ onBack }) {
           {dreams.map(d => (
             <div key={d.id} style={{ ...s.card, marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(d.date)} · {fmtTime(d.date)}</span>
+                <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(d.created_at || d.date)} · {fmtTime(d.created_at || d.date)}</span>
                 <button onClick={() => delDream(d.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.15)' }}>{Icons.trash}</button>
               </div>
               <div style={s.cardText}>{d.text}</div>
@@ -890,15 +937,15 @@ function DreamsPage({ onBack }) {
 // ============================================================
 
 function NutritionPage({ onBack }) {
-  const [entries, setEntries] = useState(load('nutrition', []))
+  const [entries, nutritionDb] = useSync('nutrition', 'nutrition')
   const [input, setInput] = useState('')
   const [found, setFound] = useState(null)
   const [show, setShow] = useState(false)
 
   const log = (text, foodData) => {
     const f = foodData || findFood(text)
-    const e = [{ id: Date.now(), text, date: new Date().toISOString(), food: f }, ...entries]
-    setEntries(e); save('nutrition', e); setFound(f); setShow(true); setInput('')
+    nutritionDb.add({ food: text, nutrients: f?.nutrients || '', benefits: f?.benefits || '' })
+    setFound(f); setShow(true); setInput('')
     setTimeout(() => setShow(false), 10000)
   }
 
@@ -964,8 +1011,8 @@ function NutritionPage({ onBack }) {
           {entries.slice(0, 10).map(e => (
             <div key={e.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', padding: '10px 14px' }}>
               <div style={{ flex: 1 }}>
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', textTransform: 'capitalize' }}>{e.text}</span>
-                <span style={{ fontSize: 10, ...s.dim, marginLeft: 8 }}>{fmtTime(e.date)}</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', textTransform: 'capitalize' }}>{e.food || e.text}</span>
+                <span style={{ fontSize: 10, ...s.dim, marginLeft: 8 }}>{fmtTime(e.created_at || e.date)}</span>
               </div>
               {e.food && <span style={{ fontSize: 10, ...s.dim }}>✦</span>}
             </div>
@@ -1025,9 +1072,21 @@ function WaterPage({ onBack }) {
   const [hist, setHist] = useState(load('waterhist', []))
   const goal = 8
 
+  useEffect(() => {
+    supabase.from('water').select('*').order('date', { ascending: false }).limit(30)
+      .then(({ data: rows }) => {
+        if (rows?.length) {
+          setHist(rows); save('waterhist', rows)
+          const todayRow = rows.find(r => r.date === today)
+          if (todayRow) { setGlasses(todayRow.glasses); save(`water_${today}`, todayRow.glasses) }
+        }
+      })
+  }, [])
+
   const add = () => {
     const n = glasses + 1; setGlasses(n); save(`water_${today}`, n)
     const h = hist.filter(x => x.date !== today); h.unshift({ date: today, glasses: n }); setHist(h.slice(0, 30)); save('waterhist', h.slice(0, 30))
+    supabase.from('water').upsert({ date: today, glasses: n }, { onConflict: 'date' }).then(() => {})
   }
 
   const pct = Math.min(100, (glasses / goal) * 100)
@@ -1096,18 +1155,17 @@ function WaterPage({ onBack }) {
 // ============================================================
 
 function GratitudePage({ onBack }) {
-  const [entries, setEntries] = useState(load('gratitude', []))
+  const [entries, gratDb] = useSync('gratitude', 'gratitude')
   const [input, setInput] = useState('')
 
   const add = () => {
     if (!input.trim()) return
-    const e = [{ id: Date.now(), text: input, date: new Date().toISOString() }, ...entries]
-    setEntries(e); save('gratitude', e); setInput('')
+    gratDb.add({ text: input }); setInput('')
   }
 
   const del = (id) => {
     if (!confirm('Are you sure you want to delete this?')) return
-    const e = entries.filter(x => x.id !== id); setEntries(e); save('gratitude', e)
+    gratDb.remove(id)
   }
 
   return (
@@ -1140,7 +1198,7 @@ function GratitudePage({ onBack }) {
       {entries.map(e => (
         <div key={e.id} style={{ ...s.card, marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(e.date)}</span>
+            <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(e.created_at || e.date)}</span>
             <button onClick={() => del(e.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.1)' }}>{Icons.trash}</button>
           </div>
           <div style={s.cardText}>{e.text}</div>
@@ -1168,14 +1226,18 @@ function VisionPage({ images, setImages, onBack }) {
     const file = e.target.files[0]; if (!file) return
     const r = new FileReader()
     r.onload = ev => {
-      const u = [...images, { id: Date.now(), url: ev.target.result, affirmation: '' }]
-      setImages(u); save('vision', u)
+      const img = { url: ev.target.result, name: file.name }
+      supabase.from('vision_images').insert(img).select().then(({ data }) => {
+        const newImg = data?.[0] || { id: Date.now(), ...img }
+        const u = [...images, newImg]; setImages(u); save('vision', u)
+      })
     }
     r.readAsDataURL(file)
   }
 
   const delImg = (id) => {
     if (!confirm('Are you sure you want to remove this from your vision board?')) return
+    supabase.from('vision_images').delete().eq('id', id).then(() => {})
     const u = images.filter(x => x.id !== id); setImages(u); save('vision', u)
   }
 
@@ -1238,7 +1300,7 @@ function VisionPage({ images, setImages, onBack }) {
 // ============================================================
 
 function VisualizePage({ onBack }) {
-  const [vizs, setVizs] = useState(load('visualizations', []))
+  const [vizs, vizDb] = useSync('visualizations', 'visualizations')
   const [input, setInput] = useState('')
   const [recording, setRecording] = useState(false)
   const recRef = useRef(null)
@@ -1255,13 +1317,12 @@ function VisualizePage({ onBack }) {
 
   const saveViz = () => {
     if (!input.trim()) return
-    const v = [{ id: Date.now(), text: input, date: new Date().toISOString(), type: recording ? 'spoken' : 'written' }, ...vizs]
-    setVizs(v); save('visualizations', v); setInput('')
+    vizDb.add({ content: input, type: recording ? 'spoken' : 'written' }); setInput('')
   }
 
   const delViz = (id) => {
     if (!confirm('Are you sure you want to delete this visualization?')) return
-    const v = vizs.filter(x => x.id !== id); setVizs(v); save('visualizations', v)
+    vizDb.remove(id)
   }
 
   return (
@@ -1301,11 +1362,11 @@ function VisualizePage({ onBack }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 10, ...s.dim }}>{v.type === 'spoken' ? '🎙' : '✎'}</span>
-              <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(v.date)}</span>
+              <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(v.created_at || v.date)}</span>
             </div>
             <button onClick={() => delViz(v.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.1)' }}>{Icons.trash}</button>
           </div>
-          <div style={{ ...s.cardText, fontStyle: 'italic' }}>"{v.text}"</div>
+          <div style={{ ...s.cardText, fontStyle: 'italic' }}>"{v.content || v.text}"</div>
         </div>
       ))}
 
@@ -1421,7 +1482,7 @@ function TimerPage({ onBack }) {
 // ============================================================
 
 function HealthPage({ onBack }) {
-  const [logs, setLogs] = useState(load('healthlogs', []))
+  const [logs, healthDb] = useSync('health_logs', 'healthlogs')
   const [mood, setMood] = useState(null)
   const [energy, setEnergy] = useState(null)
   const [sleep, setSleep] = useState('')
@@ -1432,16 +1493,15 @@ function HealthPage({ onBack }) {
   const [notes, setNotes] = useState('')
 
   const logIt = () => {
-    const e = [{
-      id: Date.now(), date: new Date().toISOString(), mood, energy,
+    healthDb.add({
+      date: new Date().toISOString(), mood, energy,
       sleep: sleep ? parseFloat(sleep) : null,
       hrv: hrv ? parseInt(hrv) : null,
       rhr: rhr ? parseInt(rhr) : null,
       steps: steps ? parseInt(steps) : null,
       calories: calories ? parseInt(calories) : null,
       notes,
-    }, ...logs]
-    setLogs(e); save('healthlogs', e)
+    })
     setMood(null); setEnergy(null); setSleep(''); setHrv(''); setRhr(''); setSteps(''); setCalories(''); setNotes('')
   }
 
@@ -1549,7 +1609,7 @@ function HealthPage({ onBack }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: 18 }}>{moods[(l.mood || 1) - 1]}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, ...s.mid }}>{fmtDate(l.date)}</div>
+                  <div style={{ fontSize: 12, ...s.mid }}>{fmtDate(l.created_at || l.date)}</div>
                   <div style={{ fontSize: 9, ...s.dim }}>{energyLabels[(l.energy || 1) - 1]}</div>
                 </div>
                 {l.sleep && <div style={{ fontSize: 11, ...s.dim }}>{l.sleep}h sleep</div>}
@@ -1576,7 +1636,7 @@ function HealthPage({ onBack }) {
 // ============================================================
 
 function ProgressPhotosPage() {
-  const [photos, setPhotos] = useState(load('progress_photos', []))
+  const [photos, photosDb] = useSync('progress_photos', 'progress_photos')
   const [tab, setTab] = useState('face')
   const fileRef = useRef(null)
 
@@ -1584,15 +1644,15 @@ function ProgressPhotosPage() {
     const file = e.target.files[0]; if (!file) return
     const r = new FileReader()
     r.onload = ev => {
-      const photo = { id: Date.now(), url: ev.target.result, date: new Date().toISOString(), type: tab, day: Math.ceil((Date.now() - QUIT_DATE) / 86400000) }
-      const u = [photo, ...photos]; setPhotos(u); save('progress_photos', u)
+      const photo = { url: ev.target.result, date: new Date().toISOString(), type: tab }
+      photosDb.add(photo)
     }
     r.readAsDataURL(file)
   }
 
   const delPhoto = (id) => {
     if (!confirm('Are you sure you want to delete this photo?')) return
-    const u = photos.filter(x => x.id !== id); setPhotos(u); save('progress_photos', u)
+    photosDb.remove(id)
   }
 
   const filtered = photos.filter(p => p.type === tab)
@@ -1627,8 +1687,8 @@ function ProgressPhotosPage() {
             <div key={photo.id} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
               <img src={photo.url} alt="" style={{ width: '100%', aspectRatio: tab === 'face' ? '1' : '3/4', objectFit: 'cover', display: 'block' }} />
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', padding: '16px 8px 6px' }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#fff' }}>Day {photo.day}</div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)' }}>{fmtDate(photo.date)}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#fff' }}>Day {photo.day || Math.max(1, Math.ceil((new Date(photo.created_at || photo.date) - QUIT_DATE) / 86400000))}</div>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)' }}>{fmtDate(photo.created_at || photo.date)}</div>
               </div>
               <button onClick={() => delPhoto(photo.id)}
                 style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 6, padding: '3px 5px', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
@@ -1674,12 +1734,12 @@ function ProgressPhotosPage() {
 
 function WorkTimerPage() {
   const today = new Date().toDateString()
-  const [sessions, setSessions] = useState(load('work_sessions', []))
+  const [sessions, sessionsDb] = useSync('work_sessions', 'work_sessions')
   const [running, setRunning] = useState(load('work_running', false))
   const [startTime, setStartTime] = useState(load('work_start', null))
   const [elapsed, setElapsed] = useState(0)
 
-  const todaySessions = sessions.filter(ss => new Date(ss.date).toDateString() === today)
+  const todaySessions = sessions.filter(ss => new Date(ss.end_time || ss.date || ss.created_at).toDateString() === today)
   const todayTotal = todaySessions.reduce((a, ss) => a + ss.duration, 0)
 
   useEffect(() => {
@@ -1699,9 +1759,7 @@ function WorkTimerPage() {
 
   const stopWork = () => {
     const duration = Math.floor((Date.now() - startTime) / 1000)
-    const session = { id: Date.now(), date: new Date().toISOString(), duration, startedAt: new Date(startTime).toISOString() }
-    const u = [session, ...sessions]
-    setSessions(u); save('work_sessions', u)
+    sessionsDb.add({ start_time: new Date(startTime).toISOString(), end_time: new Date().toISOString(), duration })
     setRunning(false); save('work_running', false)
     setStartTime(null); save('work_start', null)
     setElapsed(0)
@@ -1765,7 +1823,7 @@ function WorkTimerPage() {
           <div style={s.label}>TODAY'S SESSIONS</div>
           {todaySessions.map(ss => (
             <div key={ss.id} style={{ ...s.card, marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px' }}>
-              <div style={{ fontSize: 12, ...s.mid }}>{fmtTime(ss.startedAt)} — {fmtTime(ss.date)}</div>
+              <div style={{ fontSize: 12, ...s.mid }}>{fmtTime(ss.start_time || ss.startedAt)} — {fmtTime(ss.end_time || ss.date)}</div>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{fmtDur(ss.duration)}</div>
             </div>
           ))}
@@ -1787,25 +1845,23 @@ function WorkTimerPage() {
 // ============================================================
 
 function TasksPage({ onBack }) {
-  const [tasks, setTasks] = useState(load('tasks', []))
+  const [tasks, tasksDb] = useSync('tasks', 'tasks')
   const [input, setInput] = useState('')
   const [filter, setFilter] = useState('active') // active, completed, all
 
   const addTask = () => {
     if (!input.trim()) return
-    const t = { id: Date.now(), text: input.trim(), done: false, created: new Date().toISOString() }
-    const updated = [t, ...tasks]
-    setTasks(updated); save('tasks', updated); setInput('')
+    tasksDb.add({ text: input.trim(), done: false }); setInput('')
   }
 
   const toggle = (id) => {
-    const updated = tasks.map(t => t.id === id ? { ...t, done: !t.done, completed: !t.done ? new Date().toISOString() : null } : t)
-    setTasks(updated); save('tasks', updated)
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+    tasksDb.update(id, { done: !task.done, completed_at: !task.done ? new Date().toISOString() : null })
   }
 
   const remove = (id) => {
-    const updated = tasks.filter(t => t.id !== id)
-    setTasks(updated); save('tasks', updated)
+    tasksDb.remove(id)
   }
 
   const filtered = filter === 'all' ? tasks : filter === 'active' ? tasks.filter(t => !t.done) : tasks.filter(t => t.done)
@@ -1869,7 +1925,7 @@ function TasksPage({ onBack }) {
               {task.text}
             </div>
             <div style={{ fontSize: 10, ...s.dim, marginTop: 3 }}>
-              {task.done ? `Done ${fmtDate(task.completed)}` : fmtDate(task.created)}
+              {task.done ? `Done ${fmtDate(task.completed_at || task.completed)}` : fmtDate(task.created_at || task.created)}
             </div>
           </div>
           <button onClick={() => remove(task.id)}
@@ -1894,17 +1950,15 @@ function TasksPage({ onBack }) {
 
 function CravingsPage({ onBack }) {
   const today = new Date().toDateString()
-  const [todayCount, setTodayCount] = useState(load(`cravings_${today}`, 0))
-  const [totalResisted, setTotalResisted] = useState(load('total_resisted', 0))
-  const [cravingLog, setCravingLog] = useState(load('craving_log', []))
+  const [cravingLog, cravingDb] = useSync('craving_log', 'craving_log')
   const [justResisted, setJustResisted] = useState(false)
   const [note, setNote] = useState('')
 
+  const todayCount = cravingLog.filter(e => new Date(e.created_at || e.date).toDateString() === today).length
+  const totalResisted = cravingLog.length
+
   const resist = () => {
-    const c = todayCount + 1; setTodayCount(c); save(`cravings_${today}`, c)
-    const t = totalResisted + 1; setTotalResisted(t); save('total_resisted', t)
-    const entry = { id: Date.now(), date: new Date().toISOString(), note: note || null }
-    const u = [entry, ...cravingLog]; setCravingLog(u); save('craving_log', u)
+    cravingDb.add({ note: note || null })
     setNote(''); setJustResisted(true); setTimeout(() => setJustResisted(false), 2500)
   }
 
@@ -1976,7 +2030,7 @@ function CravingsPage({ onBack }) {
             <div key={entry.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
               <span style={{ fontSize: 12 }}>✓</span>
               <div style={{ flex: 1 }}>
-                <span style={{ fontSize: 11, ...s.mid }}>{fmtDate(entry.date)} · {fmtTime(entry.date)}</span>
+                <span style={{ fontSize: 11, ...s.mid }}>{fmtDate(entry.created_at || entry.date)} · {fmtTime(entry.created_at || entry.date)}</span>
                 {entry.note && <div style={{ fontSize: 10, ...s.dim, marginTop: 2 }}>{entry.note}</div>}
               </div>
             </div>
