@@ -297,6 +297,7 @@ export default function App() {
             {page === 'visualize' && <VisualizePage onBack={() => setPage('more')} />}
             {page === 'timer' && <TimerPage onBack={() => setPage('more')} />}
             {page === 'health' && <HealthPage onBack={() => setPage('more')} />}
+            {page === 'tasks' && <TasksPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -898,6 +899,7 @@ function MorePage({ setPage }) {
     { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
     { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
+    { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
     { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
   ]
 
@@ -1683,6 +1685,112 @@ function WorkTimerPage() {
           "An awakened imagination works with a purpose. It creates and conserves the desirable."
         </p>
         <p style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', ...s.dim, marginTop: 8 }}>Neville Goddard</p>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
+// TASKS PAGE
+// ============================================================
+
+function TasksPage({ onBack }) {
+  const [tasks, setTasks] = useState(load('tasks', []))
+  const [input, setInput] = useState('')
+  const [filter, setFilter] = useState('active') // active, completed, all
+
+  const addTask = () => {
+    if (!input.trim()) return
+    const t = { id: Date.now(), text: input.trim(), done: false, created: new Date().toISOString() }
+    const updated = [t, ...tasks]
+    setTasks(updated); save('tasks', updated); setInput('')
+  }
+
+  const toggle = (id) => {
+    const updated = tasks.map(t => t.id === id ? { ...t, done: !t.done, completed: !t.done ? new Date().toISOString() : null } : t)
+    setTasks(updated); save('tasks', updated)
+  }
+
+  const remove = (id) => {
+    const updated = tasks.filter(t => t.id !== id)
+    setTasks(updated); save('tasks', updated)
+  }
+
+  const filtered = filter === 'all' ? tasks : filter === 'active' ? tasks.filter(t => !t.done) : tasks.filter(t => t.done)
+  const activeCount = tasks.filter(t => !t.done).length
+  const doneCount = tasks.filter(t => t.done).length
+
+  return (
+    <div style={s.page}>
+      <div style={{ paddingTop: 20, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', opacity: 0.5 }}>
+          {Icons.back}
+        </button>
+        <div>
+          <h1 style={s.greeting}>Tasks</h1>
+          <p style={s.subtitle}>{activeCount} remaining · {doneCount} completed</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addTask()}
+          placeholder="What needs to be done?"
+          style={{ ...s.input, flex: 1 }} />
+        <button onClick={addTask}
+          style={{ ...s.btnSecondary, padding: '14px 20px', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+          Add
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {['active', 'completed', 'all'].map(f => (
+          <button key={f} onClick={() => setFilter(f)}
+            style={filter === f ? s.pillActive : s.pill}>
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div style={{ ...s.card, textAlign: 'center', padding: '40px 20px' }}>
+          <div style={{ fontSize: 28, marginBottom: 12 }}>{filter === 'completed' ? '✨' : '📋'}</div>
+          <p style={{ fontSize: 13, ...s.dim }}>
+            {filter === 'completed' ? 'Nothing completed yet — keep going' : filter === 'active' ? 'All clear — you crushed it' : 'Add your first task'}
+          </p>
+        </div>
+      )}
+
+      {filtered.map(task => (
+        <motion.div key={task.id}
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+          style={{ ...s.card, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => toggle(task.id)}
+            style={{ width: 22, height: 22, borderRadius: '50%', border: task.done ? '2px solid rgba(255,255,255,0.3)' : '2px solid rgba(255,255,255,0.15)',
+              background: task.done ? 'rgba(255,255,255,0.1)' : 'transparent', cursor: 'pointer', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+            {task.done && <span style={{ fontSize: 10, color: '#fff' }}>✓</span>}
+          </button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 400, color: task.done ? 'rgba(255,255,255,0.3)' : '#fff',
+              textDecoration: task.done ? 'line-through' : 'none', transition: 'all 0.2s' }}>
+              {task.text}
+            </div>
+            <div style={{ fontSize: 10, ...s.dim, marginTop: 3 }}>
+              {task.done ? `Done ${fmtDate(task.completed)}` : fmtDate(task.created)}
+            </div>
+          </div>
+          <button onClick={() => remove(task.id)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.2)', fontSize: 16, padding: '4px 8px', transition: 'all 0.2s' }}>
+            ×
+          </button>
+        </motion.div>
+      ))}
+
+      <div style={{ textAlign: 'center', marginTop: 24, marginBottom: 100 }}>
+        <p style={{ fontSize: 11, ...s.dim, fontStyle: 'italic', lineHeight: 1.6 }}>
+          "{NEVILLE_QUOTES[Math.floor(Date.now() / 86400000) % NEVILLE_QUOTES.length]}"
+        </p>
       </div>
     </div>
   )
