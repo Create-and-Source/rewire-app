@@ -1102,11 +1102,24 @@ function HealthPage({ onBack }) {
   const [mood, setMood] = useState(null)
   const [energy, setEnergy] = useState(null)
   const [sleep, setSleep] = useState('')
+  const [hrv, setHrv] = useState('')
+  const [rhr, setRhr] = useState('')
+  const [steps, setSteps] = useState('')
+  const [calories, setCalories] = useState('')
   const [notes, setNotes] = useState('')
 
   const logIt = () => {
-    const e = [{ id: Date.now(), date: new Date().toISOString(), mood, energy, sleep: sleep ? parseFloat(sleep) : null, notes }, ...logs]
-    setLogs(e); save('healthlogs', e); setMood(null); setEnergy(null); setSleep(''); setNotes('')
+    const e = [{
+      id: Date.now(), date: new Date().toISOString(), mood, energy,
+      sleep: sleep ? parseFloat(sleep) : null,
+      hrv: hrv ? parseInt(hrv) : null,
+      rhr: rhr ? parseInt(rhr) : null,
+      steps: steps ? parseInt(steps) : null,
+      calories: calories ? parseInt(calories) : null,
+      notes,
+    }, ...logs]
+    setLogs(e); save('healthlogs', e)
+    setMood(null); setEnergy(null); setSleep(''); setHrv(''); setRhr(''); setSteps(''); setCalories(''); setNotes('')
   }
 
   const moods = ['😔', '😐', '🙂', '😊', '🤩']
@@ -1120,22 +1133,7 @@ function HealthPage({ onBack }) {
       </button>
       <div style={{ paddingTop: 12, marginBottom: 24 }}>
         <h1 style={s.greeting}>Health</h1>
-        <p style={s.subtitle}>Track your recovery in body and mind</p>
-      </div>
-
-      {/* Wearables */}
-      <div style={{ ...s.card, marginBottom: 14 }}>
-        <div style={s.label}>CONNECT WEARABLE</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {[{ emoji: '⌚', name: 'Apple Watch' }, { emoji: '🟢', name: 'WHOOP' }].map(w => (
-            <div key={w.name} style={{ ...s.card, textAlign: 'center', cursor: 'pointer', padding: '16px 12px' }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{w.emoji}</div>
-              <div style={{ fontSize: 11, ...s.mid }}>{w.name}</div>
-              <div style={{ fontSize: 9, ...s.dim, marginTop: 4 }}>Coming Soon</div>
-            </div>
-          ))}
-        </div>
-        <p style={{ fontSize: 10, ...s.dim, marginTop: 10, textAlign: 'center' }}>Will sync HRV, recovery, sleep stages, and activity</p>
+        <p style={s.subtitle}>Track your body and mind</p>
       </div>
 
       {/* Spotify */}
@@ -1180,31 +1178,68 @@ function HealthPage({ onBack }) {
           <div style={{ fontSize: 12, ...s.mid, marginBottom: 8 }}>Hours of sleep</div>
           <input type="number" value={sleep} onChange={e => setSleep(e.target.value)} placeholder="7.5" step="0.5" style={s.input} />
         </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 12, ...s.mid, marginBottom: 8 }}>Notes</div>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)}
-            placeholder="How is your body feeling? Any withdrawal symptoms? Cravings?"
-            rows={3} style={s.textarea} />
-        </div>
-
-        <button onClick={logIt} style={s.btnPrimary}>Log Check-in</button>
       </div>
 
+      {/* Apple Health Data */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>APPLE HEALTH</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+          <div>
+            <div style={{ fontSize: 11, ...s.dim, marginBottom: 6 }}>HRV (ms)</div>
+            <input type="number" value={hrv} onChange={e => setHrv(e.target.value)} placeholder="45" style={s.input} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, ...s.dim, marginBottom: 6 }}>Resting HR</div>
+            <input type="number" value={rhr} onChange={e => setRhr(e.target.value)} placeholder="62" style={s.input} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, ...s.dim, marginBottom: 6 }}>Steps</div>
+            <input type="number" value={steps} onChange={e => setSteps(e.target.value)} placeholder="8000" style={s.input} />
+          </div>
+          <div>
+            <div style={{ fontSize: 11, ...s.dim, marginBottom: 6 }}>Active Cal</div>
+            <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="350" style={s.input} />
+          </div>
+        </div>
+
+        <div style={{ fontSize: 10, ...s.dim, lineHeight: 1.5 }}>
+          Enter from your Apple Watch or Health app. HRV improves as your nervous system recalibrates during recovery.
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={{ fontSize: 12, ...s.mid, marginBottom: 8 }}>Notes</div>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)}
+          placeholder="How is your body feeling today?"
+          rows={3} style={s.textarea} />
+        <button onClick={logIt} style={{ ...s.btnPrimary, marginTop: 14 }}>Log Check-in</button>
+      </div>
+
+      {/* History */}
       {logs.length > 0 && (
         <>
           <div style={s.label}>RECENT</div>
           {logs.slice(0, 7).map(l => (
-            <div key={l.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 18 }}>{moods[(l.mood || 1) - 1]}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, ...s.mid }}>{fmtDate(l.date)}</div>
-                {l.notes && <div style={{ fontSize: 10, ...s.dim, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.notes}</div>}
+            <div key={l.id} style={{ ...s.card, marginBottom: 8, padding: '14px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 18 }}>{moods[(l.mood || 1) - 1]}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, ...s.mid }}>{fmtDate(l.date)}</div>
+                  <div style={{ fontSize: 9, ...s.dim }}>{energyLabels[(l.energy || 1) - 1]}</div>
+                </div>
+                {l.sleep && <div style={{ fontSize: 11, ...s.dim }}>{l.sleep}h sleep</div>}
               </div>
-              <div style={{ textAlign: 'right' }}>
-                {l.sleep && <div style={{ fontSize: 11, ...s.dim }}>{l.sleep}h</div>}
-                {l.energy && <div style={{ fontSize: 9, ...s.dim }}>{energyLabels[(l.energy || 1) - 1]}</div>}
-              </div>
+              {(l.hrv || l.rhr || l.steps || l.calories) && (
+                <div style={{ display: 'flex', gap: 12, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  {l.hrv && <div><div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{l.hrv}</div><div style={{ fontSize: 9, ...s.dim }}>HRV</div></div>}
+                  {l.rhr && <div><div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{l.rhr}</div><div style={{ fontSize: 9, ...s.dim }}>RHR</div></div>}
+                  {l.steps && <div><div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{l.steps.toLocaleString()}</div><div style={{ fontSize: 9, ...s.dim }}>Steps</div></div>}
+                  {l.calories && <div><div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{l.calories}</div><div style={{ fontSize: 9, ...s.dim }}>Cal</div></div>}
+                </div>
+              )}
+              {l.notes && <div style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{l.notes}</div>}
             </div>
           ))}
         </>
