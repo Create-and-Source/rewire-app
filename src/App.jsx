@@ -201,7 +201,7 @@ function useSpeech(onResult) {
     setListening(true)
   }
 
-  const stop = () => { recRef.current?.stop(); setListening(false) }
+  const stop = () => { if (recRef.current) { recRef.current.onresult = null; recRef.current.stop() } setListening(false) }
 
   useEffect(() => () => { recRef.current?.stop() }, [])
 
@@ -488,7 +488,7 @@ export default function App() {
             {page === 'brain' && <BrainPage time={time} onBack={() => setPage('more')} />}
             {page === 'dreams' && <DreamsPage onBack={() => setPage('more')} />}
             {page === 'nourish' && <NutritionPage onBack={() => setPage('more')} />}
-            {page === 'work' && <WorkTimerPage />}
+            {page === 'work' && <WorkTasksPage />}
             {page === 'cravings' && <CravingsPage onBack={() => setPage('more')} />}
             {page === 'more' && <MorePage setPage={setPage} />}
             {page === 'water' && <WaterPage onBack={() => setPage('more')} />}
@@ -1970,109 +1970,124 @@ function ProgressPhotosPage({ onBack }) {
 // WORK TIMER — Start/Stop Focus Sessions
 // ============================================================
 
-function WorkTimerPage() {
+function WorkTasksPage() {
+  const [tasks, tasksDb] = useSync('work_tasks', 'work_tasks')
+  const [input, setInput] = useState('')
+  const mic = useSpeech(setInput)
   const today = new Date().toDateString()
-  const [sessions, sessionsDb] = useSync('work_sessions', 'work_sessions')
-  const [running, setRunning] = useState(load('work_running', false))
-  const [startTime, setStartTime] = useState(load('work_start', null))
-  const [elapsed, setElapsed] = useState(0)
 
-  const todaySessions = sessions.filter(ss => new Date(ss.end_time || ss.date || ss.created_at).toDateString() === today)
-  const todayTotal = todaySessions.reduce((a, ss) => a + ss.duration, 0)
-
-  useEffect(() => {
-    if (!running || !startTime) return
-    const tick = () => setElapsed(Math.floor((Date.now() - startTime) / 1000))
-    tick()
-    const i = setInterval(tick, 1000)
-    return () => clearInterval(i)
-  }, [running, startTime])
-
-  const startWork = () => {
-    const now = Date.now()
-    setStartTime(now); save('work_start', now)
-    setRunning(true); save('work_running', true)
-    setElapsed(0)
+  const addTask = () => {
+    if (!input.trim()) return
+    mic.stop()
+    tasksDb.add({ text: input.trim(), done: false })
+    setInput('')
   }
 
-  const stopWork = () => {
-    const duration = Math.floor((Date.now() - startTime) / 1000)
-    sessionsDb.add({ start_time: new Date(startTime).toISOString(), end_time: new Date().toISOString(), duration })
-    setRunning(false); save('work_running', false)
-    setStartTime(null); save('work_start', null)
-    setElapsed(0)
+  const toggle = (id) => {
+    const t = tasks.find(x => x.id === id)
+    if (t) tasksDb.update(id, { done: !t.done, completed_at: !t.done ? new Date().toISOString() : null })
   }
 
-  const fmtDur = (secs) => {
-    const h = Math.floor(secs / 3600)
-    const m = Math.floor((secs % 3600) / 60)
-    const sc = secs % 60
-    if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`
-    return `${String(m).padStart(2, '0')}:${String(sc).padStart(2, '0')}`
+  const remove = (id) => {
+    if (!confirm('Are you sure?')) return
+    tasksDb.remove(id)
   }
+
+  const clearDone = () => {
+    if (!confirm('Clear all completed tasks?')) return
+    tasks.filter(t => t.done).forEach(t => tasksDb.remove(t.id))
+  }
+
+  const active = tasks.filter(t => !t.done)
+  const done = tasks.filter(t => t.done)
+  const todayDone = done.filter(t => new Date(t.completed_at || t.created_at || t.date).toDateString() === today)
 
   return (
     <div style={s.page}>
       <div style={{ paddingTop: 20, marginBottom: 28 }}>
-        <h1 style={s.greeting}>Focus</h1>
-        <p style={s.subtitle}>Track your work sessions throughout the day</p>
+        <h1 style={s.greeting}>Work</h1>
+        <p style={s.subtitle}>Get it done, check it off</p>
       </div>
 
-      <div style={{ ...s.card, textAlign: 'center', padding: '40px 16px', marginBottom: 14 }}>
-        <div style={{ ...s.label, marginBottom: 16 }}>{running ? 'WORKING' : 'READY'}</div>
-
-        <div style={{ position: 'relative', width: 160, height: 160, margin: '0 auto 24px' }}>
-          <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="3" />
-            {running && (
-              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3"
-                strokeDasharray="8 4" strokeLinecap="round">
-                <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="10s" repeatCount="indefinite" />
-              </circle>
-            )}
-          </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 32, fontWeight: 300, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
-              {fmtDur(running ? elapsed : 0)}
-            </span>
-            <span style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{running ? 'Current session' : 'Tap to start'}</span>
-          </div>
+      {/* Add task */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addTask()}
+            placeholder="Add a work task..." style={{ ...s.input, flex: 1 }} />
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(input)} small />
+          <button onClick={addTask} style={{ ...s.btnSecondary, padding: '14px 20px', fontSize: 16, flexShrink: 0 }}>Add</button>
         </div>
-
-        <button onClick={running ? stopWork : startWork}
-          style={running ? { ...s.btnSecondary, padding: '14px 40px' } : { ...s.btnPrimary, width: 'auto', padding: '14px 40px', display: 'inline-block' }}>
-          {running ? 'Stop' : 'Start Working'}
-        </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
         <div style={{ ...s.card, textAlign: 'center', padding: '16px 12px' }}>
-          <div style={{ fontSize: 22, fontWeight: 300, color: '#fff' }}>{fmtDur(todayTotal)}</div>
-          <div style={{ fontSize: 10, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Today</div>
+          <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{active.length}</div>
+          <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>To Do</div>
         </div>
         <div style={{ ...s.card, textAlign: 'center', padding: '16px 12px' }}>
-          <div style={{ fontSize: 22, fontWeight: 300, color: '#fff' }}>{todaySessions.length}</div>
-          <div style={{ fontSize: 10, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Sessions</div>
+          <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{todayDone.length}</div>
+          <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>Done Today</div>
+        </div>
+        <div style={{ ...s.card, textAlign: 'center', padding: '16px 12px' }}>
+          <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{done.length}</div>
+          <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>All Time</div>
         </div>
       </div>
 
-      {todaySessions.length > 0 && (
-        <>
-          <div style={s.label}>TODAY'S SESSIONS</div>
-          {todaySessions.map(ss => (
-            <div key={ss.id} style={{ ...s.card, marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px' }}>
-              <div style={{ fontSize: 12, ...s.mid }}>{fmtTime(ss.start_time || ss.startedAt)} — {fmtTime(ss.end_time || ss.date)}</div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{fmtDur(ss.duration)}</div>
+      {/* Active tasks */}
+      {active.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={s.label}>TO DO</div>
+          {active.map(t => (
+            <div key={t.id} style={{ ...s.card, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px' }}>
+              <button onClick={() => toggle(t.id)}
+                style={{ width: 26, height: 26, borderRadius: 8, border: '2px solid rgba(255,255,255,0.15)',
+                  background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} />
+              <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', flex: 1 }}>{t.text}</span>
+              <button onClick={() => remove(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.1)', flexShrink: 0 }}>
+                {Icons.trash}
+              </button>
             </div>
           ))}
-        </>
+        </div>
       )}
 
-      <div style={{ ...s.card, marginTop: 14, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 14px 14px 0' }}>
-        <p style={{ fontSize: 12, fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+      {active.length === 0 && (
+        <div style={{ ...s.card, textAlign: 'center', padding: '40px 20px', marginBottom: 14 }}>
+          <span style={{ fontSize: 36 }}>✓</span>
+          <p style={{ fontSize: 16, color: '#fff', marginTop: 12 }}>All clear</p>
+          <p style={{ fontSize: 14, ...s.dim, marginTop: 6 }}>Add work tasks above</p>
+        </div>
+      )}
+
+      {/* Completed */}
+      {done.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={s.label}>COMPLETED</div>
+            <button onClick={clearDone} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>Clear all</button>
+          </div>
+          {done.slice(0, 20).map(t => (
+            <div key={t.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', opacity: 0.5 }}>
+              <button onClick={() => toggle(t.id)}
+                style={{ width: 26, height: 26, borderRadius: 8, border: '2px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#fff', fontSize: 13 }}>✓</span>
+              </button>
+              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through', flex: 1 }}>{t.text}</span>
+              <span style={{ fontSize: 11, ...s.dim }}>{fmtDate(t.completed_at || t.created_at || t.date)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ ...s.card, marginTop: 14, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 16px 16px 0' }}>
+        <p style={{ fontSize: 14, fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>
           "An awakened imagination works with a purpose. It creates and conserves the desirable."
         </p>
-        <p style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', ...s.dim, marginTop: 8 }}>Neville Goddard</p>
+        <p style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', ...s.dim, marginTop: 8 }}>Neville Goddard</p>
       </div>
     </div>
   )
