@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -499,6 +499,7 @@ export default function App() {
             {page === 'tasks' && <TasksPage onBack={() => setPage('more')} />}
             {page === 'run' && <RunPage onBack={() => setPage('more')} />}
             {page === 'readings' && <ReadingsPage onBack={() => setPage('more')} />}
+            {page === 'bathroom' && <BathroomPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -1117,6 +1118,7 @@ function MorePage({ setPage }) {
     { id: 'run', label: 'Run Tracker', sub: 'GPS tracking, distance, pace' },
     { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
     { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
+    { id: 'bathroom', label: 'Bathroom Tracker', sub: 'Your body is detoxing' },
     { id: 'progress', label: 'Progress Photos', sub: 'Watch yourself transform' },
     { id: 'vision', label: 'Vision Board', sub: 'See it, feel it, become it' },
     { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
@@ -1302,6 +1304,114 @@ function GratitudePage({ onBack }) {
         <div style={{ textAlign: 'center', padding: '60px 0', ...s.dim }}>
           <p style={{ fontSize: 13 }}>Start your gratitude practice</p>
           <p style={{ fontSize: 11, marginTop: 6, opacity: 0.6 }}>Gratitude physically rewires neural pathways toward positivity</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// BATHROOM TRACKER
+// ============================================================
+
+function BathroomPage({ onBack }) {
+  const today = new Date().toDateString()
+  const [log, logDb] = useSync('bathroom_log', 'bathroom_log')
+  const todayEntries = log.filter(e => new Date(e.created_at || e.date).toDateString() === today)
+  const [note, setNote] = useState('')
+
+  const logVisit = (type) => {
+    logDb.add({ type, note: note.trim() || null })
+    setNote('')
+  }
+
+  // Group by date for history
+  const grouped = {}
+  log.forEach(e => {
+    const d = new Date(e.created_at || e.date).toDateString()
+    if (!grouped[d]) grouped[d] = []
+    grouped[d].push(e)
+  })
+  const dates = Object.keys(grouped).slice(0, 14)
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 13, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 24 }}>
+        <h1 style={s.greeting}>Bathroom</h1>
+        <p style={s.subtitle}>Your body is detoxing — track it</p>
+      </div>
+
+      {/* Today's count */}
+      <div style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '28px 18px' }}>
+        <div style={s.label}>TODAY</div>
+        <div style={{ fontSize: 48, fontWeight: 200, color: '#fff', marginTop: 8 }}>{todayEntries.length}</div>
+        <div style={{ fontSize: 13, ...s.dim, marginTop: 4 }}>visits</div>
+      </div>
+
+      {/* Log buttons */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+        <button onClick={() => logVisit('1')}
+          style={{ ...s.card, flex: 1, textAlign: 'center', cursor: 'pointer', padding: '20px 14px', transition: 'all 0.2s' }}>
+          <div style={{ fontSize: 28 }}>💧</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#fff', marginTop: 8 }}>#1</div>
+        </button>
+        <button onClick={() => logVisit('2')}
+          style={{ ...s.card, flex: 1, textAlign: 'center', cursor: 'pointer', padding: '20px 14px', transition: 'all 0.2s' }}>
+          <div style={{ fontSize: 28 }}>🪵</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#fff', marginTop: 8 }}>#2</div>
+        </button>
+      </div>
+
+      {/* Optional note */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <input value={note} onChange={e => setNote(e.target.value)}
+          placeholder="Optional note (color, consistency, etc.)"
+          style={{ ...s.input, background: 'transparent', border: 'none', padding: '4px 0' }} />
+      </div>
+
+      {/* Recovery context */}
+      <div style={{ ...s.card, borderLeft: '2px solid rgba(255,255,255,0.1)', borderRadius: '0 14px 14px 0', marginBottom: 14 }}>
+        <div style={s.cardText}>
+          <strong style={{ color: '#fff' }}>During recovery,</strong> your digestive system recalibrates as the endocannabinoid system
+          stops receiving external input. THC affects gut motility — changes in frequency and consistency are completely normal
+          as your body detoxes and your gut-brain axis rebalances.
+        </div>
+      </div>
+
+      {/* Today's log */}
+      {todayEntries.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={s.label}>TODAY'S LOG</div>
+          {todayEntries.map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+              <span style={{ fontSize: 18 }}>{e.type === '1' ? '💧' : '🪵'}</span>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>#{e.type}</span>
+                {e.note && <span style={{ fontSize: 12, ...s.dim, marginLeft: 8 }}>{e.note}</span>}
+              </div>
+              <span style={{ fontSize: 11, ...s.dim }}>{new Date(e.created_at || e.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* History */}
+      {dates.length > 1 && (
+        <div>
+          <div style={s.label}>HISTORY</div>
+          {dates.slice(1).map(d => (
+            <div key={d} style={{ ...s.card, marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px' }}>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{new Date(d).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <span style={{ fontSize: 13, ...s.dim }}>💧 {grouped[d].filter(e => e.type === '1').length}</span>
+                <span style={{ fontSize: 13, ...s.dim }}>🪵 {grouped[d].filter(e => e.type === '2').length}</span>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{grouped[d].length}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
