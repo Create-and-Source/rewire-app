@@ -381,7 +381,7 @@ export default function App() {
   const tabs = [
     { id: 'home', icon: Icons.home, label: 'Home' },
     { id: 'sats', icon: Icons.star, label: 'SATS' },
-    { id: 'progress', icon: Icons.image, label: 'Progress' },
+    { id: 'gratitude', icon: Icons.heart, label: 'Gratitude' },
     { id: 'work', icon: Icons.timer, label: 'Focus' },
     { id: 'more', icon: Icons.plus, label: 'More' },
   ]
@@ -417,7 +417,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -431,7 +431,8 @@ export default function App() {
           <motion.div key={page} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             {page === 'home' && <HomePage time={time} quote={quote} setPage={setPage} />}
             {page === 'sats' && <SATSPage />}
-            {page === 'progress' && <ProgressPhotosPage />}
+            {page === 'gratitude' && <GratitudePage />}
+            {page === 'progress' && <ProgressPhotosPage onBack={() => setPage('more')} />}
             {page === 'brain' && <BrainPage time={time} onBack={() => setPage('more')} />}
             {page === 'dreams' && <DreamsPage onBack={() => setPage('more')} />}
             {page === 'nourish' && <NutritionPage onBack={() => setPage('more')} />}
@@ -439,7 +440,6 @@ export default function App() {
             {page === 'cravings' && <CravingsPage onBack={() => setPage('more')} />}
             {page === 'more' && <MorePage setPage={setPage} />}
             {page === 'water' && <WaterPage onBack={() => setPage('more')} />}
-            {page === 'gratitude' && <GratitudePage onBack={() => setPage('more')} />}
             {page === 'vision' && <VisionPage images={visionImages} setImages={setVisionImages} onBack={() => setPage('more')} />}
             {page === 'visualize' && <VisualizePage onBack={() => setPage('more')} />}
             {page === 'timer' && <TimerPage onBack={() => setPage('more')} />}
@@ -1042,7 +1042,7 @@ function MorePage({ setPage }) {
     { id: 'nourish', label: 'Nourish', sub: 'What food does for your brain' },
     { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
     { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
-    { id: 'gratitude', label: 'Gratitude Journal', sub: 'Rewire toward abundance' },
+    { id: 'progress', label: 'Progress Photos', sub: 'Watch yourself transform' },
     { id: 'vision', label: 'Vision Board', sub: 'See it, feel it, become it' },
     { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
@@ -1179,10 +1179,12 @@ function GratitudePage({ onBack }) {
 
   return (
     <div style={s.page}>
-      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
-        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
-      </button>
-      <div style={{ paddingTop: 12, marginBottom: 24 }}>
+      {onBack && (
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+        </button>
+      )}
+      <div style={{ paddingTop: onBack ? 12 : 20, marginBottom: 24 }}>
         <h1 style={s.greeting}>Gratitude</h1>
         <p style={s.subtitle}>Rewire your brain toward abundance</p>
       </div>
@@ -1644,7 +1646,7 @@ function HealthPage({ onBack }) {
 // PROGRESS PHOTOS — Daily Face & Body
 // ============================================================
 
-function ProgressPhotosPage() {
+function ProgressPhotosPage({ onBack }) {
   const [photos, photosDb] = useSync('progress_photos', 'progress_photos')
   const [tab, setTab] = useState('face')
   const fileRef = useRef(null)
@@ -1669,7 +1671,12 @@ function ProgressPhotosPage() {
 
   return (
     <div style={s.page}>
-      <div style={{ paddingTop: 20, marginBottom: 24 }}>
+      {onBack && (
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+        </button>
+      )}
+      <div style={{ paddingTop: onBack ? 12 : 20, marginBottom: 24 }}>
         <h1 style={s.greeting}>Progress</h1>
         <p style={s.subtitle}>Day {dayNum} — watch yourself transform</p>
       </div>
