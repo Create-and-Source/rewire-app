@@ -253,20 +253,20 @@ const ambient = new Ambient()
 
 const s = {
   page: { maxWidth: 430, margin: '0 auto', padding: '0 16px', minHeight: '100vh' },
-  greeting: { fontSize: 28, fontWeight: 300, color: '#fff', letterSpacing: -0.5 },
-  subtitle: { fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 4 },
-  label: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)', marginBottom: 12 },
-  card: { background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '20px 18px' },
-  cardTitle: { fontSize: 16, fontWeight: 500, color: '#fff' },
-  cardText: { fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginTop: 6 },
-  stat: { fontSize: 32, fontWeight: 300, color: '#fff' },
-  statUnit: { fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 2 },
-  pillActive: { borderRadius: 999, padding: '10px 18px', fontSize: 14, fontWeight: 500, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' },
-  pill: { borderRadius: 999, padding: '10px 18px', fontSize: 14, fontWeight: 500, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s' },
-  btnPrimary: { width: '100%', padding: '16px 0', borderRadius: 999, background: '#fff', color: '#0D0D0D', fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer', letterSpacing: 0.5, transition: 'all 0.2s' },
-  btnSecondary: { padding: '12px 22px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 14, fontWeight: 500, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'all 0.2s' },
-  input: { width: '100%', padding: '16px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 16, outline: 'none', fontFamily: 'Inter' },
-  textarea: { width: '100%', padding: '16px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 16, outline: 'none', fontFamily: 'Inter', resize: 'none', lineHeight: 1.6 },
+  greeting: { fontSize: 32, fontWeight: 300, color: '#fff', letterSpacing: -0.5 },
+  subtitle: { fontSize: 17, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 6 },
+  label: { fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)', marginBottom: 12 },
+  card: { background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '22px 20px' },
+  cardTitle: { fontSize: 18, fontWeight: 500, color: '#fff' },
+  cardText: { fontSize: 16, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginTop: 6 },
+  stat: { fontSize: 38, fontWeight: 300, color: '#fff' },
+  statUnit: { fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 2 },
+  pillActive: { borderRadius: 999, padding: '12px 20px', fontSize: 16, fontWeight: 500, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' },
+  pill: { borderRadius: 999, padding: '12px 20px', fontSize: 16, fontWeight: 500, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s' },
+  btnPrimary: { width: '100%', padding: '18px 0', borderRadius: 999, background: '#fff', color: '#0D0D0D', fontSize: 17, fontWeight: 600, border: 'none', cursor: 'pointer', letterSpacing: 0.5, transition: 'all 0.2s' },
+  btnSecondary: { padding: '14px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 16, fontWeight: 500, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'all 0.2s' },
+  input: { width: '100%', padding: '18px 20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, color: '#fff', fontSize: 18, outline: 'none', fontFamily: 'Inter' },
+  textarea: { width: '100%', padding: '18px 20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, color: '#fff', fontSize: 18, outline: 'none', fontFamily: 'Inter', resize: 'none', lineHeight: 1.7 },
   dim: { color: 'rgba(255,255,255,0.35)' },
   mid: { color: 'rgba(255,255,255,0.6)' },
   bright: { color: '#fff' },
@@ -275,7 +275,7 @@ const s = {
   nav: { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(13,13,13,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.06)' },
   navInner: { maxWidth: 430, margin: '0 auto', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 0 max(8px, env(safe-area-inset-bottom))' },
   navItem: (active) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', opacity: active ? 1 : 0.35, transition: 'all 0.2s', padding: '4px 8px' }),
-  navLabel: { fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: '#fff' },
+  navLabel: { fontSize: 12, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: '#fff' },
   quoteBar: { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(13,13,13,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' },
   quoteInner: { maxWidth: 430, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8 },
   quoteText: { fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.35)', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -500,6 +500,8 @@ export default function App() {
             {page === 'run' && <RunPage onBack={() => setPage('more')} />}
             {page === 'readings' && <ReadingsPage onBack={() => setPage('more')} />}
             {page === 'bathroom' && <BathroomPage onBack={() => setPage('more')} />}
+            {page === 'energy' && <EnergyPage onBack={() => setPage('more')} />}
+            {page === 'journal' && <JournalPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -620,6 +622,8 @@ function HomePage({ time, quote, setPage }) {
         <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
+            { id: 'energy', icon: '⚡', label: 'Energy' },
+            { id: 'journal', icon: '📝', label: 'Journal' },
             { id: 'dreams', icon: '🌙', label: 'Dreams' },
             { id: 'run', icon: '🏃', label: 'Run' },
             { id: 'water', icon: '💧', label: 'Water' },
@@ -1152,6 +1156,8 @@ function MorePage({ setPage }) {
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
     { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
     { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
+    { id: 'energy', label: 'Energy Tracker', sub: 'Track it, watch it come back' },
+    { id: 'journal', label: 'Journal', sub: 'Process, release, grow' },
     { id: 'readings', label: 'Daily Readings', sub: 'Neville, Proctor, Dyer' },
     { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
   ]
@@ -2666,6 +2672,302 @@ function CravingsPage({ onBack }) {
             </div>
           ))}
         </>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// ENERGY TRACKER
+// ============================================================
+
+function EnergyPage({ onBack }) {
+  const [log, logDb] = useSync('energy_log', 'energy_log')
+  const [selected, setSelected] = useState(null)
+  const [note, setNote] = useState('')
+  const mic = useSpeech(setNote)
+  const today = new Date().toDateString()
+  const todayEntries = log.filter(e => new Date(e.created_at || e.date).toDateString() === today)
+  const latestToday = todayEntries.length ? todayEntries[0] : null
+
+  const levels = [
+    { value: 1, emoji: '😴', label: 'Crashed', color: 'rgba(255,100,100,0.15)' },
+    { value: 2, emoji: '🥱', label: 'Exhausted', color: 'rgba(255,140,100,0.15)' },
+    { value: 3, emoji: '😐', label: 'Low', color: 'rgba(255,180,100,0.15)' },
+    { value: 4, emoji: '🙂', label: 'Okay', color: 'rgba(255,220,100,0.15)' },
+    { value: 5, emoji: '😊', label: 'Good', color: 'rgba(180,255,100,0.15)' },
+    { value: 6, emoji: '⚡', label: 'Strong', color: 'rgba(100,255,150,0.15)' },
+    { value: 7, emoji: '🔥', label: 'On Fire', color: 'rgba(100,200,255,0.15)' },
+  ]
+
+  const logEnergy = () => {
+    if (selected === null) return
+    const level = levels[selected]
+    mic.stop()
+    logDb.add({ level: level.value, label: level.label, emoji: level.emoji, note: note.trim() || null })
+    setSelected(null)
+    setNote('')
+  }
+
+  const last14 = []
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    const ds = d.toDateString()
+    const dayEntries = log.filter(e => new Date(e.created_at || e.date).toDateString() === ds)
+    const avg = dayEntries.length ? dayEntries.reduce((s, e) => s + (e.level || 0), 0) / dayEntries.length : 0
+    last14.push({ date: d, avg, count: dayEntries.length })
+  }
+
+  const daysSinceQuit = Math.floor((Date.now() - QUIT_DATE.getTime()) / 86400000)
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 24 }}>
+        <h1 style={s.greeting}>Energy</h1>
+        <p style={s.subtitle}>Track it — watch it come back</p>
+      </div>
+
+      {latestToday && (
+        <div style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '24px 18px' }}>
+          <div style={s.label}>RIGHT NOW</div>
+          <div style={{ fontSize: 48, marginTop: 8 }}>{latestToday.emoji}</div>
+          <div style={{ fontSize: 18, fontWeight: 500, color: '#fff', marginTop: 8 }}>{latestToday.label}</div>
+          <div style={{ fontSize: 13, ...s.dim, marginTop: 4 }}>Logged at {fmtTime(latestToday.created_at || latestToday.date)}</div>
+        </div>
+      )}
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>HOW'S YOUR ENERGY?</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, marginBottom: 16 }}>
+          {levels.map((l, i) => (
+            <button key={i} onClick={() => setSelected(i)}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: selected === i ? l.color : 'none',
+                border: selected === i ? '1px solid rgba(255,255,255,0.15)' : '1px solid transparent',
+                borderRadius: 12, padding: '10px 6px', cursor: 'pointer', transition: 'all 0.2s', flex: 1 }}>
+              <span style={{ fontSize: 28 }}>{l.emoji}</span>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{l.label}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <input value={note} onChange={e => setNote(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && logEnergy()}
+            placeholder="What's affecting your energy? (optional)" style={{ ...s.input, flex: 1 }} />
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(note)} small />
+        </div>
+        <button onClick={logEnergy} disabled={selected === null}
+          style={{ ...s.btnPrimary, opacity: selected === null ? 0.3 : 1 }}>Log Energy</button>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>14-DAY TREND</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 100, marginTop: 8 }}>
+          {last14.map((d, i) => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: '100%', background: d.avg > 0 ? `rgba(255,255,255,${0.06 + d.avg * 0.04})` : 'rgba(255,255,255,0.03)',
+                height: d.avg > 0 ? `${(d.avg / 7) * 80}px` : '4px', borderRadius: 4, transition: 'all 0.3s', minHeight: 4 }} />
+              <span style={{ fontSize: 9, ...s.dim }}>{d.date.toLocaleDateString('en-US', { weekday: 'narrow' })}</span>
+            </div>
+          ))}
+        </div>
+        {last14.filter(d => d.count > 0).length >= 3 && (() => {
+          const withData = last14.filter(d => d.count > 0)
+          const firstHalf = withData.slice(0, Math.floor(withData.length / 2))
+          const secondHalf = withData.slice(Math.floor(withData.length / 2))
+          const avgFirst = firstHalf.reduce((sum, d) => sum + d.avg, 0) / firstHalf.length
+          const avgSecond = secondHalf.reduce((sum, d) => sum + d.avg, 0) / secondHalf.length
+          const trending = avgSecond > avgFirst ? 'up' : avgSecond < avgFirst ? 'down' : 'steady'
+          return (
+            <p style={{ fontSize: 13, ...s.dim, marginTop: 12, textAlign: 'center' }}>
+              {trending === 'up' ? '📈 Your energy is trending up' : trending === 'down' ? '📉 Hang in there — this is temporary' : '➡️ Holding steady'}
+            </p>
+          )
+        })()}
+      </div>
+
+      <div style={{ ...s.card, borderLeft: '2px solid rgba(255,255,255,0.1)', borderRadius: '0 14px 14px 0', marginBottom: 14 }}>
+        <div style={s.cardText}>
+          <strong style={{ color: '#fff' }}>Low energy is normal right now.</strong> Your brain's dopamine system ran on external input for a long time.
+          Natural dopamine production is rebuilding — it typically takes 2-4 weeks for baseline energy to stabilize.
+          {daysSinceQuit < 7 && ' You\'re in the hardest week. Every day your mitochondria are recalibrating.'}
+          {daysSinceQuit >= 7 && daysSinceQuit < 21 && ' Week by week, your natural energy pathways are strengthening.'}
+          {daysSinceQuit >= 21 && ' By now your dopamine receptors are substantially recovered. Keep tracking — you\'ll see the proof.'}
+          {' '}Exercise, sunlight, cold water, and protein all accelerate the process.
+        </div>
+      </div>
+
+      {todayEntries.length > 0 && (
+        <div>
+          <div style={s.label}>TODAY'S LOG</div>
+          {todayEntries.map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
+              <span style={{ fontSize: 24 }}>{e.emoji}</span>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{e.label}</span>
+                {e.note && <div style={{ fontSize: 13, ...s.dim, marginTop: 2 }}>{e.note}</div>}
+              </div>
+              <span style={{ fontSize: 12, ...s.dim }}>{fmtTime(e.created_at || e.date)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// JOURNAL
+// ============================================================
+
+function JournalPage({ onBack }) {
+  const [entries, journalDb] = useSync('journal', 'journal')
+  const [text, setText] = useState('')
+  const [mood, setMood] = useState(null)
+  const [expanded, setExpanded] = useState(null)
+  const mic = useSpeech(setText)
+
+  const moods = [
+    { emoji: '😢', label: 'Tough' },
+    { emoji: '😔', label: 'Low' },
+    { emoji: '😐', label: 'Neutral' },
+    { emoji: '🙂', label: 'Okay' },
+    { emoji: '😊', label: 'Good' },
+    { emoji: '🥰', label: 'Great' },
+  ]
+
+  const prompts = [
+    "What am I feeling right now?",
+    "What would I tell myself 30 days from now?",
+    "What did I handle well today?",
+    "What's one thing I'm proud of?",
+    "What's been on my mind?",
+    "Describe a moment of clarity you had recently.",
+    "What's something you want to let go of?",
+    "What does your ideal day look like sober?",
+  ]
+  const [prompt] = useState(prompts[Math.floor(Math.random() * prompts.length)])
+
+  const save = () => {
+    if (!text.trim()) return
+    mic.stop()
+    const m = mood !== null ? moods[mood] : null
+    journalDb.add({ text: text.trim(), mood_emoji: m?.emoji || null, mood_label: m?.label || null })
+    setText('')
+    setMood(null)
+  }
+
+  const del = (id) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return
+    journalDb.remove(id)
+  }
+
+  const grouped = {}
+  entries.forEach(e => {
+    const d = fmtDate(e.created_at || e.date)
+    if (!grouped[d]) grouped[d] = []
+    grouped[d].push(e)
+  })
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 24 }}>
+        <h1 style={s.greeting}>Journal</h1>
+        <p style={s.subtitle}>Process, release, grow</p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 14px 14px 0' }}>
+        <p style={{ fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', ...s.dim, marginBottom: 6 }}>Today's prompt</p>
+        <p style={{ fontSize: 16, fontWeight: 300, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', lineHeight: 1.6 }}>
+          "{prompt}"
+        </p>
+      </div>
+
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <textarea value={text} onChange={e => setText(e.target.value)}
+          placeholder="Write freely... this is just for you"
+          rows={6} style={{ ...s.textarea, minHeight: 140 }} />
+
+        <div style={{ marginTop: 14, marginBottom: 14 }}>
+          <p style={{ fontSize: 13, ...s.dim, marginBottom: 8 }}>How are you feeling?</p>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {moods.map((m, i) => (
+              <button key={i} onClick={() => setMood(mood === i ? null : i)}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1,
+                  background: mood === i ? 'rgba(255,255,255,0.08)' : 'none',
+                  border: mood === i ? '1px solid rgba(255,255,255,0.15)' : '1px solid transparent',
+                  borderRadius: 10, padding: '10px 4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <span style={{ fontSize: 26 }}>{m.emoji}</span>
+                <span style={{ fontSize: 10, ...s.dim }}>{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(text)} />
+          <button onClick={save} disabled={!text.trim()}
+            style={{ ...s.btnSecondary, opacity: text.trim() ? 1 : 0.3, padding: '14px 28px' }}>Save Entry</button>
+        </div>
+      </div>
+
+      {entries.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          <div style={{ ...s.card, flex: 1, textAlign: 'center', padding: '16px 12px' }}>
+            <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{entries.length}</div>
+            <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>Entries</div>
+          </div>
+          <div style={{ ...s.card, flex: 1, textAlign: 'center', padding: '16px 12px' }}>
+            <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{Object.keys(grouped).length}</div>
+            <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>Days</div>
+          </div>
+          <div style={{ ...s.card, flex: 1, textAlign: 'center', padding: '16px 12px' }}>
+            <div style={{ fontSize: 28, fontWeight: 200, color: '#fff' }}>{entries.reduce((sum, e) => sum + (e.text?.split(/\s+/).length || 0), 0).toLocaleString()}</div>
+            <div style={{ fontSize: 12, ...s.dim, marginTop: 4 }}>Words</div>
+          </div>
+        </div>
+      )}
+
+      {Object.keys(grouped).map(date => (
+        <div key={date} style={{ marginBottom: 14 }}>
+          <div style={s.label}>{date.toUpperCase()}</div>
+          {grouped[date].map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 6, transition: 'all 0.2s' }}>
+              <button onClick={() => setExpanded(expanded === e.id ? null : e.id)}
+                style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: expanded === e.id ? 10 : 0 }}>
+                  {e.mood_emoji && <span style={{ fontSize: 20 }}>{e.mood_emoji}</span>}
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
+                      {expanded === e.id ? (e.mood_label || '') : (e.text?.slice(0, 60) + (e.text?.length > 60 ? '...' : ''))}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 12, ...s.dim }}>{fmtTime(e.created_at || e.date)}</span>
+                </div>
+              </button>
+              {expanded === e.id && (
+                <>
+                  <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{e.text}</div>
+                  <button onClick={() => del(e.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.15)', marginTop: 10 }}>
+                    Delete entry
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {entries.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 0', ...s.dim }}>
+          <p style={{ fontSize: 15 }}>Your journal is waiting</p>
+          <p style={{ fontSize: 13, marginTop: 6, opacity: 0.6 }}>Writing during recovery helps your brain process emotions it numbed for a long time</p>
+        </div>
       )}
     </div>
   )
