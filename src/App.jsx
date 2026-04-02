@@ -615,24 +615,51 @@ function HomePage({ time, quote, setPage }) {
         {activeTasks.length > 5 && <p style={{ fontSize: 12, ...s.dim, marginTop: 8 }}>+{activeTasks.length - 5} more</p>}
       </div>
 
+      {/* Quick tools grid */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          {[
+            { id: 'dreams', icon: '🌙', label: 'Dreams' },
+            { id: 'run', icon: '🏃', label: 'Run' },
+            { id: 'water', icon: '💧', label: 'Water' },
+            { id: 'bathroom', icon: '🚻', label: 'Bathroom' },
+            { id: 'nourish', icon: '🥗', label: 'Nourish' },
+            { id: 'timer', icon: '🧘', label: 'Meditate' },
+            { id: 'visualize', icon: '👁️', label: 'Visualize' },
+            { id: 'vision', icon: '✨', label: 'Vision Board' },
+            { id: 'readings', icon: '📖', label: 'Readings' },
+            { id: 'health', icon: '❤️', label: 'Health' },
+            { id: 'progress', icon: '📸', label: 'Photos' },
+            { id: 'brain', icon: '🧠', label: 'Brain' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setPage(t.id)}
+              style={{ ...s.card, textAlign: 'center', cursor: 'pointer', padding: '16px 8px', transition: 'all 0.2s' }}>
+              <div style={{ fontSize: 24, marginBottom: 6 }}>{t.icon}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{t.label}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Milestone — just the current one, subtle */}
       <div style={{ ...s.card, marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           <span style={{ fontSize: 20 }}>{cur.icon}</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, fontWeight: 500, color: '#fff' }}>{cur.title}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, marginTop: 4 }}>{cur.description}</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>{cur.title}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, marginTop: 4 }}>{cur.description}</div>
           </div>
         </div>
         {nxt && (
           <div style={{ marginTop: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, ...s.dim, marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, ...s.dim, marginBottom: 4 }}>
               <span>Now</span><span>{nxt.title}</span>
             </div>
             <div style={s.track}><div style={s.fill(pct)} /></div>
           </div>
         )}
-        <button onClick={() => setPage('brain')} style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 10, letterSpacing: 1 }}>
+        <button onClick={() => setPage('brain')} style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 10, letterSpacing: 1 }}>
           Learn what's happening in your brain →
         </button>
       </div>
@@ -640,10 +667,10 @@ function HomePage({ time, quote, setPage }) {
       {/* Neville quote card */}
       <div style={{ ...s.card, marginTop: 0, textAlign: 'center', padding: '24px 20px' }}>
         <span style={{ ...s.dim, fontSize: 16 }}>✦</span>
-        <p style={{ fontSize: 15, fontWeight: 300, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginTop: 12, fontStyle: 'italic' }}>
+        <p style={{ fontSize: 16, fontWeight: 300, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginTop: 12, fontStyle: 'italic' }}>
           "{quote}"
         </p>
-        <p style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 12 }}>Neville Goddard</p>
+        <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 12 }}>Neville Goddard</p>
       </div>
     </div>
   )
