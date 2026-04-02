@@ -26,20 +26,25 @@ const NEVILLE_QUOTES = [
 ]
 
 const NEURAL_MILESTONES = [
-  { hours: 0, title: "The Decision", description: "You chose yourself. CB1 receptors begin their journey back to baseline. Your brain is already starting to listen differently.", icon: "🌱" },
-  { hours: 6, title: "THC Metabolism Shifts", description: "Your liver is actively processing stored THC. Endocannabinoid system begins recalibrating. Your natural reward system is waking up.", icon: "⚡" },
-  { hours: 12, title: "First Sleep Cycle", description: "Your first sober sleep. REM rebound may cause vivid dreams — your brain is remembering how to dream. This is healing.", icon: "🌙" },
-  { hours: 24, title: "Day 1 Complete", description: "CB1 receptor upregulation begins. Your brain is literally growing new receptor sites. Dopamine pathways start resensitizing.", icon: "🌟" },
-  { hours: 48, title: "48 Hours", description: "Cannabinoid receptors are measurably recovering. You may feel emotions more intensely — that's your emotional brain coming back online.", icon: "💫" },
-  { hours: 72, title: "72 Hours", description: "THC blood levels dropping significantly. Appetite signals normalizing. Your prefrontal cortex is strengthening its connections.", icon: "🧠" },
-  { hours: 168, title: "One Week", description: "REM sleep architecture rebuilding. Dream recall increasing. Memory consolidation improving. Your hippocampus is celebrating.", icon: "🌊" },
-  { hours: 336, title: "Two Weeks", description: "CB1 receptor density approaching normal in cortical regions. Verbal memory improving. Attention span lengthening.", icon: "🔮" },
-  { hours: 504, title: "Three Weeks", description: "Withdrawal symptoms fading. Natural endocannabinoid (anandamide) production stabilizing. Your body is making its own bliss molecules again.", icon: "✨" },
-  { hours: 720, title: "One Month", description: "Significant cognitive recovery. Working memory sharper. Executive function strengthening. Neural pruning accelerating.", icon: "🏔️" },
-  { hours: 1440, title: "Two Months", description: "Emotional regulation markedly improved. Stress response recalibrated. Neuroplasticity gains visible in daily life.", icon: "🦋" },
-  { hours: 2160, title: "Three Months", description: "CB1 receptors fully normalized. Dream life rich and meaningful. Motivation and drive from natural dopamine. You are rewired.", icon: "🌸" },
-  { hours: 4320, title: "Six Months", description: "Full endocannabinoid system recovery. Deep structural changes in white matter integrity.", icon: "🌺" },
-  { hours: 8760, title: "One Year", description: "Complete neural rewiring. New default pathways established. An entirely new architecture of clarity, presence, and power.", icon: "👑" },
+  { hours: 0, title: "Hour 0 — The Decision", description: "The moment you chose yourself. Your last dose of THC is being processed. Your endocannabinoid system, which has been flooded with external cannabinoids, just got the signal that the supply is stopping. CB1 receptors throughout your brain — in the hippocampus (memory), prefrontal cortex (decisions), amygdala (emotions), cerebellum (coordination) — are about to start waking up. The rewiring begins now.", icon: "🌱" },
+  { hours: 6, title: "Hour 6 — Metabolism Shifts", description: "Your liver enzyme CYP2C9 is actively breaking down THC into 11-OH-THC (still psychoactive) and then into THC-COOH (inactive). Your body temperature and heart rate are normalizing. You might feel restless or irritable — that's your GABA and glutamate systems rebalancing. Your brain has been using external cannabinoids to regulate anxiety; now it has to remember how to do it alone.", icon: "⚡" },
+  { hours: 12, title: "Hour 12 — First Night", description: "Your first sober sleep cycle. THC normally suppresses REM sleep, so tonight your brain will begin REM rebound — dramatically increasing the intensity and duration of dreams. You may sleep poorly or wake up sweating. This is your autonomic nervous system recalibrating. Your brain is literally clearing a backlog of emotional processing that's been queued up. Every vivid dream is repair work.", icon: "🌙" },
+  { hours: 24, title: "Day 1 — Receptors Wake Up", description: "CB1 receptor upregulation has begun. Your brain is physically growing new receptor sites on neurons throughout your cortex. THC-COOH levels in your blood are dropping. You may notice heightened anxiety, irritability, or emotional sensitivity — this is your amygdala coming back online at full volume after being dampened. Your appetite may be reduced because your hypothalamus is recalibrating hunger signals. You made it a full day. That matters.", icon: "🌟" },
+  { hours: 48, title: "Day 2 — Emotions Amplify", description: "Cannabinoid receptors are measurably recovering in brain imaging studies. You may feel emotions more intensely than you have in months or years — joy, sadness, frustration, tenderness. This isn't a problem; it's your limbic system (emotional brain) coming back to full sensitivity. Your brain spent so long with an external emotional regulator that these feelings may feel unfamiliar or overwhelming. They're not too much. They're the right amount. You just forgot.", icon: "💫" },
+  { hours: 72, title: "Day 3 — Peak Withdrawal", description: "This is often the hardest day. Cravings peak as your reward circuitry (nucleus accumbens) is fully aware the supply has stopped. Dopamine levels are at their lowest point — your brain reduced its own production because THC was providing artificial surges. You might feel flat, unmotivated, or like nothing matters. This is temporary. Your prefrontal cortex is strengthening its inhibitory connections, literally building the neural infrastructure of willpower. Sleep may still be disrupted. Appetite fluctuating. Stay hydrated — your brain needs water to run the enzymatic processes clearing THC metabolites.", icon: "🧠" },
+  { hours: 96, title: "Day 4 — The Shift Begins", description: "Withdrawal symptoms start plateauing. Your GABAergic system is rebalancing — GABA is your brain's primary calming neurotransmitter, and it's starting to normalize without external cannabinoid input. You may notice moments of unexpected clarity or calm between waves of discomfort. Your brain's default mode network (the 'daydreaming' network that Neville's visualization work activates) is becoming more accessible. Night sweats may continue as your body purges stored THC from fat cells.", icon: "🌤️" },
+  { hours: 120, title: "Day 5 — Appetite Returns", description: "Your hypothalamus is recalibrating. Appetite signals are starting to feel more natural — less 'I need to eat everything' and more genuine hunger. Your gut-brain axis is shifting too; the endocannabinoid system plays a huge role in digestion, and your gut is producing its own endocannabinoids again. Serotonin production (90% of which happens in your gut) is stabilizing. Dreams are intensely vivid now — this is peak REM rebound. Your brain is processing weeks or months of unprocessed emotional material.", icon: "🍃" },
+  { hours: 144, title: "Day 6 — Neuroplasticity Surge", description: "Your brain is entering a period of enhanced neuroplasticity — the ability to form new connections and pathways. BDNF (Brain-Derived Neurotrophic Factor) levels are increasing. This is like fertilizer for your neurons. Every new habit you practice, every visualization, every moment of presence is being encoded more deeply than it would have been while using. This is the window where the work you do on yourself has outsized impact. Your brain is hungry to rewire.", icon: "✨" },
+  { hours: 168, title: "Day 7 — One Week", description: "You made it a week. REM sleep architecture is actively rebuilding — your sleep cycles are getting longer and more structured. Memory consolidation is improving; your hippocampus is processing and storing information more effectively. You might notice you're remembering names, conversations, and details better. Verbal fluency is returning. The 'brain fog' that chronic use creates is starting to lift. Your endocannabinoid system is now producing measurably more anandamide (the 'bliss molecule') on its own.", icon: "🌊" },
+  { hours: 240, title: "Day 10 — Emotional Depth", description: "The acute withdrawal window is closing. Irritability and anxiety are fading for many people by now. What remains is deeper — you're feeling things at a depth you may not have in a long time. Music sounds different. Colors look more vivid. Conversations feel more present. This isn't new sensitivity being created; it's your natural sensitivity being uncovered. Your dopamine receptors are resensitizing, meaning normal pleasures are starting to hit harder.", icon: "🎵" },
+  { hours: 336, title: "Day 14 — Two Weeks", description: "CB1 receptor density in cortical regions is approaching normal levels. Brain imaging studies show measurable differences between day 1 and day 14. Your verbal memory is objectively improving — you can recall words, names, and sequences more easily. Attention span is lengthening. Executive function in your prefrontal cortex is strengthening, meaning better decision-making, planning, and impulse control. Sleep is becoming more restorative as your circadian rhythm resets. You're thinking clearer, and it's not your imagination.", icon: "🔮" },
+  { hours: 504, title: "Day 21 — Three Weeks", description: "Most physical withdrawal symptoms have resolved. Your body is making its own bliss molecules again — anandamide and 2-AG production has normalized. These natural endocannabinoids are smoother, subtler, and more attuned to your actual needs than external THC ever was. Your stress response (HPA axis) is recalibrating — cortisol patterns are normalizing, meaning you handle stress more evenly instead of spiking. Your brain's ability to learn and adapt is markedly improved.", icon: "🦅" },
+  { hours: 720, title: "Day 30 — One Month", description: "Significant cognitive recovery across all domains. Working memory is sharper. Sustained attention is stronger. Processing speed has increased. Neural pruning is accelerating — your brain is actively dismantling the synaptic pathways that were dedicated to seeking and using cannabis, and redirecting that neural real estate to whatever you're focused on now. Your dreams have settled from the wild REM rebound into rich, meaningful, narrative dreams. Your default emotional state is more stable than it's been in a long time.", icon: "🏔️" },
+  { hours: 1080, title: "Day 45 — Six Weeks", description: "Your brain's white matter integrity is measurably improving. White matter is the wiring that connects different brain regions — the myelin-coated axons that let neurons talk to each other quickly. Chronic cannabis use can degrade these connections, and they're rebuilding now. You're literally getting faster. Communication between your prefrontal cortex (thinking) and limbic system (feeling) is stronger, which means you're responding to emotions rather than being overwhelmed by them.", icon: "🔗" },
+  { hours: 1440, title: "Day 60 — Two Months", description: "Emotional regulation is markedly improved. Your amygdala and prefrontal cortex are working together smoothly — you feel emotions fully but you're not hijacked by them. Stress doesn't flatten you the way it might have in early recovery. Neuroplasticity gains are visible in daily life — you're learning faster, adapting quicker, building skills more readily. Your baseline mood is higher and more stable. People around you may have noticed changes before you did.", icon: "🦋" },
+  { hours: 2160, title: "Day 90 — Three Months", description: "CB1 receptors are fully normalized in most brain regions. Your endocannabinoid system is operating as it was designed to — producing the right amount of internal cannabinoids at the right time for the right duration. Dream life is rich and meaningful. Motivation and drive come from natural dopamine. Cognitive function has recovered to the point where you may not remember what the impairment felt like. You are, by every neurological measure, rewired.", icon: "🌸" },
+  { hours: 4320, title: "Day 180 — Six Months", description: "Full endocannabinoid system recovery confirmed in longitudinal studies. Deep structural changes in white matter integrity. Your brain's default mode network — the network activated during rest, reflection, and imagination — is functioning differently than it did when you were using. Your capacity for visualization, presence, and intentional thought has been permanently expanded by this recovery. You didn't just quit something. You became someone new.", icon: "🌺" },
+  { hours: 8760, title: "Day 365 — One Year", description: "Complete neural rewiring. New default pathways are fully established and reinforced by months of use. The old pathways — the ones that led to craving, to reaching for something external, to numbing — have been pruned back through disuse. Your brain has built an entirely new architecture. An architecture of clarity, presence, and power. This isn't the person you were before you started using. This is the person you were always becoming.", icon: "👑" },
 ]
 
 const FOOD_BENEFITS = {
@@ -238,7 +243,7 @@ export default function App() {
   const tabs = [
     { id: 'home', icon: Icons.home, label: 'Home' },
     { id: 'sats', icon: Icons.star, label: 'SATS' },
-    { id: 'nourish', icon: Icons.salad, label: 'Nourish' },
+    { id: 'progress', icon: Icons.image, label: 'Progress' },
     { id: 'work', icon: Icons.timer, label: 'Focus' },
     { id: 'more', icon: Icons.plus, label: 'More' },
   ]
@@ -265,7 +270,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','gratitude','vision','visualize','timer','health','brain','cravings','dreams','nourish'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -279,9 +284,10 @@ export default function App() {
           <motion.div key={page} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             {page === 'home' && <HomePage time={time} quote={quote} setPage={setPage} />}
             {page === 'sats' && <SATSPage />}
+            {page === 'progress' && <ProgressPhotosPage />}
             {page === 'brain' && <BrainPage time={time} onBack={() => setPage('more')} />}
             {page === 'dreams' && <DreamsPage onBack={() => setPage('more')} />}
-            {page === 'nourish' && <NutritionPage />}
+            {page === 'nourish' && <NutritionPage onBack={() => setPage('more')} />}
             {page === 'work' && <WorkTimerPage />}
             {page === 'cravings' && <CravingsPage onBack={() => setPage('more')} />}
             {page === 'more' && <MorePage setPage={setPage} />}
@@ -790,7 +796,7 @@ function DreamsPage({ onBack }) {
 // NUTRITION
 // ============================================================
 
-function NutritionPage() {
+function NutritionPage({ onBack }) {
   const [entries, setEntries] = useState(load('nutrition', []))
   const [input, setInput] = useState('')
   const [found, setFound] = useState(null)
@@ -805,7 +811,12 @@ function NutritionPage() {
 
   return (
     <div style={s.page}>
-      <div style={{ paddingTop: 20, marginBottom: 24 }}>
+      {onBack && (
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 12, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+        </button>
+      )}
+      <div style={{ paddingTop: onBack ? 12 : 20, marginBottom: 24 }}>
         <h1 style={s.greeting}>Nourish</h1>
         <p style={s.subtitle}>Feed your brain what it needs to rebuild</p>
       </div>
@@ -879,13 +890,14 @@ function NutritionPage() {
 function MorePage({ setPage }) {
   const items = [
     { id: 'dreams', label: 'Dream Journal', sub: 'Your brain is learning to dream again' },
+    { id: 'nourish', label: 'Nourish', sub: 'What food does for your brain' },
     { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
     { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
     { id: 'gratitude', label: 'Gratitude Journal', sub: 'Rewire toward abundance' },
     { id: 'vision', label: 'Vision Board', sub: 'See it, feel it, become it' },
-    { id: 'visualize', label: 'Visualize', sub: 'Live in the end — SATS' },
+    { id: 'visualize', label: 'Visualize', sub: 'Live in the end' },
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
-    { id: 'health', label: 'Health & Wearables', sub: 'Track body and mind' },
+    { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
     { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
   ]
 
@@ -1459,6 +1471,103 @@ function HealthPage({ onBack }) {
               {l.notes && <div style={{ fontSize: 10, ...s.dim, marginTop: 6 }}>{l.notes}</div>}
             </div>
           ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// PROGRESS PHOTOS — Daily Face & Body
+// ============================================================
+
+function ProgressPhotosPage() {
+  const [photos, setPhotos] = useState(load('progress_photos', []))
+  const [tab, setTab] = useState('face')
+  const fileRef = useRef(null)
+
+  const addPhoto = (e) => {
+    const file = e.target.files[0]; if (!file) return
+    const r = new FileReader()
+    r.onload = ev => {
+      const photo = { id: Date.now(), url: ev.target.result, date: new Date().toISOString(), type: tab, day: Math.ceil((Date.now() - QUIT_DATE) / 86400000) }
+      const u = [photo, ...photos]; setPhotos(u); save('progress_photos', u)
+    }
+    r.readAsDataURL(file)
+  }
+
+  const delPhoto = (id) => {
+    if (!confirm('Are you sure you want to delete this photo?')) return
+    const u = photos.filter(x => x.id !== id); setPhotos(u); save('progress_photos', u)
+  }
+
+  const filtered = photos.filter(p => p.type === tab)
+  const dayNum = Math.max(1, Math.ceil((Date.now() - QUIT_DATE) / 86400000))
+
+  return (
+    <div style={s.page}>
+      <div style={{ paddingTop: 20, marginBottom: 24 }}>
+        <h1 style={s.greeting}>Progress</h1>
+        <p style={s.subtitle}>Day {dayNum} — watch yourself transform</p>
+      </div>
+
+      {/* Face / Body toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <button onClick={() => setTab('face')} style={tab === 'face' ? s.pillActive : s.pill}>Face</button>
+        <button onClick={() => setTab('body')} style={tab === 'body' ? s.pillActive : s.pill}>Body</button>
+      </div>
+
+      {/* Add photo */}
+      <button onClick={() => fileRef.current?.click()}
+        style={{ ...s.card, width: '100%', textAlign: 'center', cursor: 'pointer', padding: '28px 16px', marginBottom: 14,
+          border: '1px dashed rgba(255,255,255,0.15)', transition: 'all 0.2s' }}>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>+ Add today's {tab} photo</div>
+        <div style={{ fontSize: 11, ...s.dim, marginTop: 6 }}>Day {dayNum} of your journey</div>
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" capture="user" onChange={addPhoto} style={{ display: 'none' }} />
+
+      {/* Photo grid */}
+      {filtered.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+          {filtered.map(photo => (
+            <div key={photo.id} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
+              <img src={photo.url} alt="" style={{ width: '100%', aspectRatio: tab === 'face' ? '1' : '3/4', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', padding: '16px 8px 6px' }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#fff' }}>Day {photo.day}</div>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)' }}>{fmtDate(photo.date)}</div>
+              </div>
+              <button onClick={() => delPhoto(photo.id)}
+                style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 6, padding: '3px 5px', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
+                {Icons.trash}
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center', padding: '60px 0', ...s.dim }}>
+          <p style={{ fontSize: 13 }}>No {tab} photos yet</p>
+          <p style={{ fontSize: 11, marginTop: 6, opacity: 0.6 }}>Take your first photo to start tracking your transformation</p>
+        </div>
+      )}
+
+      {/* Side by side comparison */}
+      {filtered.length >= 2 && (
+        <>
+          <div style={{ ...s.label, marginTop: 24 }}>FIRST vs LATEST</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
+              <img src={filtered[filtered.length - 1].url} alt="" style={{ width: '100%', aspectRatio: tab === 'face' ? '1' : '3/4', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', padding: '12px 8px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#fff' }}>Day {filtered[filtered.length - 1].day}</div>
+              </div>
+            </div>
+            <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
+              <img src={filtered[0].url} alt="" style={{ width: '100%', aspectRatio: tab === 'face' ? '1' : '3/4', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', padding: '12px 8px 6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#fff' }}>Day {filtered[0].day}</div>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>
