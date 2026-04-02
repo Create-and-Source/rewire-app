@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -498,6 +498,7 @@ export default function App() {
             {page === 'health' && <HealthPage onBack={() => setPage('more')} />}
             {page === 'tasks' && <TasksPage onBack={() => setPage('more')} />}
             {page === 'run' && <RunPage onBack={() => setPage('more')} />}
+            {page === 'readings' && <ReadingsPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -1092,6 +1093,7 @@ function MorePage({ setPage }) {
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
     { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
     { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
+    { id: 'readings', label: 'Daily Readings', sub: 'Neville, Proctor, Dyer' },
     { id: 'brain', label: 'Brain Science', sub: 'What\'s happening inside' },
   ]
 
@@ -1214,7 +1216,9 @@ function GratitudePage({ onBack }) {
 
   const add = () => {
     if (!input.trim()) return
-    gratDb.add({ text: input }); setInput('')
+    mic.stop()
+    gratDb.add({ text: input })
+    setInput('')
   }
 
   const del = (id) => {
@@ -1997,6 +2001,181 @@ function TasksPage({ onBack }) {
           "{NEVILLE_QUOTES[Math.floor(Date.now() / 86400000) % NEVILLE_QUOTES.length]}"
         </p>
       </div>
+    </div>
+  )
+}
+
+// ============================================================
+// DAILY READINGS — Bob Proctor, Wayne Dyer, Neville Goddard
+// ============================================================
+
+const TEACHINGS = [
+  { day: 1, teacher: 'Neville Goddard', title: 'The Law of Assumption', text: 'Everything begins with an assumption. When you assume the feeling of your wish fulfilled — not hoping, not wishing, but actually feeling yourself INTO the state — you set the creative power of your consciousness in motion.\n\nNeville taught that your imagination is God. Not a metaphor. The actual creative force of the universe lives in your ability to imagine and FEEL a scene as though it were real.\n\nToday\'s practice: Close your eyes. Pick one thing you desire. Now feel yourself already having it. Not getting it someday — HAVING it. What does the room look like? Who congratulates you? What do your hands touch? Stay in that feeling for as long as you can. That feeling IS the prayer.' },
+  { day: 2, teacher: 'Bob Proctor', title: 'The Terror Barrier', text: 'Bob Proctor spent 60 years studying why people stay stuck. He discovered something he called the Terror Barrier — the invisible wall between your current life and the life you want.\n\nHere\'s how it works: You get an idea. You get excited. You start moving toward it. Then fear hits. Your body floods with anxiety. Every cell screams "GO BACK TO WHAT\'S FAMILIAR." Most people retreat. They rationalize. They say "it wasn\'t meant to be."\n\nBut the terror barrier is not a stop sign. It\'s a GATE. The people who push through it — despite shaking hands, despite doubt, despite the voice saying "who do you think you are?" — they\'re the ones whose lives change.\n\nToday\'s practice: What is one thing you\'ve been avoiding because it scares you? Name it. Now ask: what would the version of me who already achieved this do RIGHT NOW?' },
+  { day: 3, teacher: 'Wayne Dyer', title: 'You Are Not Your Body', text: 'Wayne Dyer loved to ask his audiences: "Who is it that\'s aware that you\'re thinking?" That question is a key that unlocks everything.\n\nYou have thoughts, but you are not your thoughts. You have a body, but you are not your body. You have emotions, but you are not your emotions. You are the OBSERVER. The infinite awareness behind all of it.\n\nWhen you identify with the observer — the silent witness — you stop being tossed around by every craving, every fear, every mood swing. You realize that the craving is just weather. It passes through. But YOU remain.\n\nToday\'s practice: Sit quietly for 5 minutes. Don\'t try to stop your thoughts. Just watch them. Notice: "There\'s a thought about food. There\'s a thought about tomorrow. There\'s a craving." Don\'t judge them. Just notice. The one who notices is the real you.' },
+  { day: 4, teacher: 'Neville Goddard', title: 'Everyone Is You Pushed Out', text: 'This is one of Neville\'s most powerful — and most misunderstood — teachings. "The world is yourself pushed out." Every person in your life is reflecting back your own assumptions about them.\n\nIf you assume someone is against you, you will find evidence everywhere. If you assume they support you, they will begin to. This isn\'t about controlling people — it\'s about recognizing that your inner state creates your outer experience.\n\nThe people who frustrate you are showing you beliefs you hold about yourself. The people who inspire you are showing you who you already are inside.\n\nToday\'s practice: Think of someone who bothers you. Now ask: "What belief about MYSELF is this person reflecting?" Write it down. Then revise it. Imagine that person being kind, supportive, wonderful to you. Hold that image. Watch what happens.' },
+  { day: 5, teacher: 'Bob Proctor', title: 'Paradigms', text: 'Bob Proctor\'s life work centered on one word: PARADIGM. A paradigm is a multitude of habits — most of which you didn\'t choose. They were installed in you before age 7 by parents, teachers, television, environment.\n\nYour paradigm controls everything: how much money you earn, who you attract, how you feel about yourself, what you eat, whether you exercise, whether you reach for a substance when stressed.\n\nHere\'s the truth that changes everything: your paradigm is just PROGRAMMING. And programs can be changed. Not by willpower alone — willpower is conscious, and paradigms live in the subconscious. You change them through REPETITION of new ideas.\n\nThis is why you\'re here. Every day you don\'t smoke, every gratitude entry, every visualization — you are literally reprogramming your paradigm.\n\nToday\'s practice: Write down 3 beliefs about yourself that you KNOW were given to you by someone else. Then write the belief you want to replace each one with. Read the new beliefs aloud, with feeling, morning and night.' },
+  { day: 6, teacher: 'Wayne Dyer', title: 'The Power of Intention', text: 'Wayne Dyer redefined intention. Most people think intention means "I\'m going to try really hard." Wayne said no — intention is a FORCE in the universe, like gravity. You don\'t try to use gravity. You align with it.\n\nIntention has qualities: creativity, kindness, love, beauty, expansion, abundance, receptivity. When you align with these qualities, you tap into the force of intention. When you\'re angry, fearful, judgmental — you disconnect from it.\n\nYour job isn\'t to MAKE things happen. Your job is to get yourself into alignment with the force that makes everything happen. Stop pushing. Start aligning.\n\nToday\'s practice: Before every decision today, pause and ask: "Is this moving me toward expansion or contraction? Toward love or fear?" Choose expansion every time.' },
+  { day: 7, teacher: 'Neville Goddard', title: 'Revision', text: 'Revision is one of Neville\'s most practical techniques. At the end of each day, replay any event that didn\'t go the way you wanted — but revise it. Change the ending. See the conversation going perfectly. See yourself responding with confidence. See the outcome you wished had happened.\n\nThis isn\'t denial. It\'s creative intervention. When you revise a memory, you are literally rewriting the neural pathway associated with that event. Neuroscience has since confirmed this: recalled memories are RECONSTRUCTED, not replayed. Every time you recall something, you can change it.\n\nYou\'re not lying to yourself. You\'re choosing which version of reality your subconscious builds upon.\n\nToday\'s practice: Before sleep tonight, take the one thing that bothered you most today. Replay it in your mind, but change it. See it going perfectly. Feel the relief. Fall asleep in that revised state.' },
+  { day: 8, teacher: 'Bob Proctor', title: 'You Were Born Rich', text: 'The title of Bob\'s most famous book is "You Were Born Rich." Not "you can become rich" — you were BORN rich. The wealth, the health, the love, the creativity — it\'s already inside you. It was never missing.\n\nWhat happened is that layers of conditioning covered it up. Like a diamond buried under mud. The diamond doesn\'t need to be created. It needs to be uncovered.\n\nEvery craving you resist, every morning you show up for yourself, every visualization you do — you\'re not building something new. You\'re removing what was never yours to begin with. The doubt. The numbness. The habits that kept you small.\n\nToday\'s practice: Finish this sentence 10 times, each with a different answer: "I was born with the ability to _______." Don\'t think too hard. Let it flow.' },
+  { day: 9, teacher: 'Wayne Dyer', title: 'When You Change the Way You Look at Things', text: '"When you change the way you look at things, the things you look at change." This is Wayne Dyer\'s most quoted line, and it\'s based on quantum physics.\n\nThe observer effect in physics shows that the act of observation literally changes what\'s being observed. Wayne extended this to life: your perception isn\'t passive. It\'s creative. How you see the world actively shapes the world you see.\n\nLook at your recovery as punishment? It feels like prison.\nLook at your recovery as liberation? It feels like flying.\nThe facts haven\'t changed. Your LENS changed. And the lens is everything.\n\nToday\'s practice: Take your biggest current struggle. Write down 3 ways it\'s actually serving you. Not might serve you someday — is serving you RIGHT NOW. Change the lens.' },
+  { day: 10, teacher: 'Neville Goddard', title: 'The Sabbath', text: 'Neville taught about the Sabbath — not as a day of the week, but as a STATE of consciousness. The Sabbath is the feeling of "it is done." It\'s when you stop trying, stop pushing, stop worrying about HOW your desire will manifest.\n\nWhen you plant a seed, you don\'t dig it up every hour to check if it\'s growing. You water it, give it light, and TRUST. The Sabbath is that trust.\n\nMost people fail at manifestation not because they don\'t imagine well enough — but because they can\'t REST afterward. They keep checking. Keep doubting. Keep looking for evidence. And that frantic energy actually pushes the desire away.\n\nToday\'s practice: Think of something you\'ve been wanting. Imagine it fulfilled one more time, vividly, with feeling. Then say to yourself: "It is done." And for the rest of today, refuse to think about HOW it will happen. Let go completely.' },
+  { day: 11, teacher: 'Bob Proctor', title: 'The Stick Person', text: 'Bob Proctor used a simple drawing he called the Stick Person to explain the mind. The top half is the CONSCIOUS mind — where you think, analyze, choose. The bottom half is the SUBCONSCIOUS mind — where your habits, beliefs, and paradigms live. Below that is the BODY — which acts out whatever the subconscious tells it to.\n\nHere\'s the key: information enters through the conscious mind, but it doesn\'t change behavior until it reaches the subconscious. This is why you can KNOW something is bad for you and still do it. Knowing is conscious. Doing is subconscious.\n\nThe bridge between knowing and doing is REPETITION and EMOTION. When you repeat a new idea with intense feeling, it sinks from conscious to subconscious. That\'s when behavior changes automatically.\n\nToday\'s practice: Choose one affirmation. Something you want to believe about yourself. Say it 50 times today — not mindlessly, but FEELING each repetition. This is the work of reprogramming.' },
+  { day: 12, teacher: 'Wayne Dyer', title: 'There Are No Justified Resentments', text: 'Wayne Dyer was fierce about this one: "There are no justified resentments." Not some resentments. Not the small ones. ALL of them.\n\nResentment is a poison you drink hoping the other person dies. It doesn\'t affect them at all. It only destroys your peace, your health, your energy. It keeps you tethered to the past — the exact opposite of the freedom you\'re building.\n\n"But they hurt me." Yes. And carrying the resentment hurts you again, every single day. Forgiveness isn\'t saying what happened was okay. It\'s saying: "I refuse to let this steal one more moment of my life."\n\nToday\'s practice: Think of someone you resent. Write their name down. Then write: "I release you. I free myself." Feel the weight leave your body. You don\'t have to mean it perfectly yet. Just begin.' },
+  { day: 13, teacher: 'Neville Goddard', title: 'States of Consciousness', text: 'Neville taught that there are infinite "states" of consciousness — and you are always occupying one. The state of wealth. The state of poverty. The state of health. The state of sickness. The state of being loved. The state of loneliness.\n\nA state is not something you DO — it\'s something you WEAR. Like a garment. And you can change your garment at any time. You don\'t have to earn the right to feel abundant. You just step into that state and stay there.\n\nThe mistake people make is thinking they need to change their CIRCUMSTANCES to change their state. Neville said it\'s the reverse. Change your STATE and your circumstances must rearrange to match.\n\nToday\'s practice: Right now, identify the state you\'re currently in. Name it honestly. Now choose the state you want to occupy. Don\'t wait for permission. Step into it. Walk, talk, think, and feel AS IF you are already there.' },
+  { day: 14, teacher: 'Bob Proctor', title: 'Worthy of the Goal', text: 'Bob Proctor would ask his students to set a goal that terrified them. Then he\'d say something that stopped them cold: "Do you believe you\'re WORTHY of this goal?"\n\nMost people\'s honest answer is no. And that unworthiness is the paradigm that keeps the goal at arm\'s length forever. You can visualize all day, but if deep down you believe you don\'t deserve it, your subconscious will sabotage every opportunity.\n\nUnworthiness is not truth. It\'s programming. A child isn\'t born feeling unworthy. That was installed. Which means it can be uninstalled.\n\nToday\'s practice: Write your biggest dream at the top of a page. Below it write: "I am worthy of this because:" and list 10 reasons. They don\'t have to be achievements. "Because I exist" is enough. "Because I decided to change" is enough. You ARE enough.' },
+  { day: 15, teacher: 'Wayne Dyer', title: 'Be the Change', text: 'Wayne loved the Gandhi quote: "Be the change you wish to see in the world." But he took it deeper. He said most people try to change the world first, then hope they\'ll feel different inside. It\'s backwards.\n\nYou cannot give what you don\'t have. You cannot create peace around you while there\'s war inside you. You cannot inspire health while your own body is neglected. You cannot attract abundance while radiating scarcity.\n\nYour recovery — this daily practice of showing up, of choosing yourself, of doing the hard thing — is not selfish. It\'s the most generous thing you can do. Because every time you heal yourself, you give everyone around you permission to heal too.\n\nToday\'s practice: Instead of trying to fix anything outside of you today, focus entirely on your inner state. Meditate. Move your body. Eat something beautiful. Speak kindly to yourself. Watch how the world responds.' },
+  { day: 16, teacher: 'Neville Goddard', title: 'The Bridge of Incidents', text: 'After you assume the feeling of the wish fulfilled and enter the Sabbath — the state of "it is done" — something begins to happen. Neville called it the Bridge of Incidents.\n\nEvents will unfold that move you toward your desire. But they may not look like what you expected. A seemingly random conversation. A "wrong" turn. A delay that puts you in the right place at the right time. A setback that redirects you to something better.\n\nYour job is NOT to engineer the bridge. Your job is to stay faithful to the end result and TRUST the process. The bridge will look different than you imagined. Let it.\n\nToday\'s practice: Look back at your life. Find one time when something "bad" happened that led to something wonderful. Write it down. That was a bridge of incidents. Trust that bridges are being built for you right now.' },
+  { day: 17, teacher: 'Bob Proctor', title: 'Vibration and Frequency', text: 'Everything in the universe vibrates. Your thoughts vibrate. Your feelings vibrate. Your body vibrates. Bob Proctor taught that you are a walking transmission tower — constantly broadcasting a frequency.\n\nThe frequency you broadcast determines what you attract. Like attracts like. A tuning fork at 440 Hz will make another 440 Hz fork vibrate across the room. Your dominant vibration does the same thing with people, circumstances, and opportunities.\n\nWhen you were numbing yourself, you were broadcasting a low, dampened frequency. Now that you\'re clearing out — your signal is getting stronger, clearer, more powerful. You\'re literally becoming a magnet for different things.\n\nToday\'s practice: Pay attention to how you FEEL throughout the day. Your feelings are your vibration indicator. When you notice yourself feeling low, don\'t judge it — just consciously shift. Put on music that lifts you. Move your body. Think of someone you love. Raise the signal.' },
+  { day: 18, teacher: 'Wayne Dyer', title: 'Your Life Is a Dream', text: 'Wayne Dyer often quoted the Aboriginal proverb: "We are all visitors to this time, this place. We are just passing through. Our purpose here is to observe, to learn, to grow, to love — and then we return home."\n\nWhen you zoom out far enough, this entire life is one brief dream. The things that feel so heavy — the struggles, the cravings, the fears — they\'re temporary weather in an eternal sky.\n\nThis isn\'t about dismissing your pain. It\'s about perspective. When you know you\'re eternal, the small self — the one that craves, the one that doubts, the one that fears — loses its grip. You can hold your struggles gently instead of being crushed by them.\n\nToday\'s practice: Imagine yourself at the end of your life, looking back at today. What would that future you say about this moment? About your courage? About the path you\'re walking? Write a letter from your 90-year-old self to you today.' },
+  { day: 19, teacher: 'Neville Goddard', title: 'Feeling Is the Secret', text: 'The title of Neville\'s shortest and most powerful book: "Feeling Is the Secret." Not thinking. Not affirming. Not vision boarding. FEELING.\n\nYou can say "I am wealthy" a thousand times, but if you FEEL broke, broke is what you\'ll experience. The subconscious mind doesn\'t respond to words. It responds to the feeling behind the words.\n\nThis is why Neville emphasized the state akin to sleep — that drowsy, relaxed state right before you fall asleep. In that state, the conscious mind\'s defenses are down, and feelings are imprinted directly into the subconscious. This is your SATS practice.\n\nToday\'s practice: Tonight, as you drift to sleep, don\'t just visualize — FEEL. Feel the sheets of the bed in your dream home. Feel the handshake of celebration. Feel the tears of joy. Let the feeling be so real that you can\'t tell the difference between imagination and memory.' },
+  { day: 20, teacher: 'Bob Proctor', title: 'The Knowing-Doing Gap', text: 'Bob Proctor pointed out something obvious that everyone ignores: billions of people KNOW what to do. They know to eat well, exercise, save money, be kind, follow their dreams. And yet most don\'t do it.\n\nThe gap between knowing and doing is the most expensive real estate in the world. Your entire life is determined by that gap.\n\nWhat bridges the gap? Not more information. Not another book. Not another YouTube video. The bridge is DECISION — true decision, which comes from the Latin "decidere," meaning to CUT OFF. When you truly decide, you cut off every other possibility. There\'s no plan B. There\'s no "I\'ll try."\n\nYou decided to quit. That\'s a real decision. Now protect that decision with everything you have.\n\nToday\'s practice: Make one decision you\'ve been postponing. Not a goal, not a wish — a DECISION. Write it as "I have decided to _______." Feel the finality of it. Cut off the alternative.' },
+  { day: 21, teacher: 'Wayne Dyer', title: 'Don\'t Die with Your Music Still in You', text: '"Don\'t die with your music still in you." Wayne Dyer said this was the most important sentence he ever spoke.\n\nInside you is a song that only you can sing. A contribution that only you can make. A life that only you can live. Every moment you spend numbing, hiding, playing small — that music stays trapped.\n\nRecovery isn\'t just about stopping something. It\'s about STARTING something. What is the thing you came here to do? What lights you up so much that time disappears? What would you do every day if money didn\'t exist?\n\nThat thing — whatever it is — the world needs it. And the clearer your mind gets, the louder that music becomes.\n\nToday\'s practice: Write down 5 things that make you lose track of time. Not guilty pleasures — things that make you feel ALIVE. These are clues to your music. Follow them.' },
+  { day: 22, teacher: 'Neville Goddard', title: 'The Promise', text: 'Late in his life, Neville spoke less about manifestation and more about what he called "The Promise." He taught that all of creation — every struggle, every joy, every dark night — is God experiencing itself through you.\n\nYou are not a human trying to become spiritual. You are spirit having a human experience. And the whole point of the experience is AWAKENING — realizing who you really are.\n\nYour recovery is part of this awakening. The fog lifting. The dreams returning. The feelings deepening. You\'re not just getting clean — you\'re waking up.\n\nToday\'s practice: Today, look at everything through the lens of awakening. The discomfort is awakening. The clarity is awakening. The tears are awakening. You are not broken and being fixed. You are asleep and waking up.' },
+  { day: 23, teacher: 'Bob Proctor', title: 'Think and Grow Rich Decoded', text: 'Bob spent his life teaching the principles from Napoleon Hill\'s "Think and Grow Rich." The book\'s real secret, Bob said, isn\'t about money at all. It\'s about the creative power of THOUGHT.\n\nThought → Feeling → Action → Result. That\'s the chain. And it ALWAYS starts with thought. Not circumstance. Not luck. Not other people. Thought.\n\nThe thoughts you habitually think become feelings. Those feelings drive your actions. Those actions produce results. And those results reinforce the original thoughts. It\'s a cycle — and right now, you\'re building a NEW cycle.\n\nEvery time you resist a craving, you break the old cycle. Every time you visualize, you plant new thoughts. Every time you practice gratitude, you generate new feelings. The cycle is turning.\n\nToday\'s practice: Catch your first 3 thoughts tomorrow morning. Write them down. Are they building the life you want? If not, consciously replace them. This is where everything starts.' },
+  { day: 24, teacher: 'Wayne Dyer', title: 'There Is a Spiritual Solution to Every Problem', text: 'Wayne Dyer wrote an entire book with this title. His premise: every problem exists at a certain frequency. The solution exists at a HIGHER frequency. You can\'t solve a problem at the level of consciousness that created it.\n\nFrustration, anger, fear — these are low-frequency states. They can identify problems, but they can\'t solve them. The solutions live in love, peace, gratitude, surrender.\n\nThis doesn\'t mean ignoring problems. It means ELEVATING yourself before addressing them. Handle the crisis from peace, not panic. Make the decision from love, not fear. The answer you find at a higher frequency will be fundamentally different — and better — than the one you\'d find while stressed.\n\nToday\'s practice: Take your current biggest problem. Instead of trying to solve it, spend 10 minutes in meditation or deep breathing first. Then revisit the problem from that calmer state. Notice how different the answers feel.' },
+  { day: 25, teacher: 'Neville Goddard', title: 'The Pruning Shears of Revision', text: 'Neville returned to the practice of Revision again and again because he considered it the single most powerful technique available to humans.\n\nEvery night, you have the opportunity to prune your life like a gardener prunes a tree. Cut away what didn\'t serve you. Reshape what happened. Plant seeds of what you want to grow.\n\nA student once asked Neville: "How long should I practice revision?" He answered: "Until it is so natural that you revise every unlovely thought the moment it occurs — not just at night, but in real time."\n\nImagine having that skill. Something goes wrong, and INSTANTLY you revise it in your mind. Someone says something hurtful, and you immediately replay it with love. That\'s mastery.\n\nToday\'s practice: Practice real-time revision. The next time something happens today that bothers you — even something tiny — immediately replay it in your mind the way you wish it had gone. Don\'t wait until tonight. Revise on the spot.' },
+  { day: 26, teacher: 'Bob Proctor', title: 'Multiple Sources of Income', text: 'Bob Proctor taught that having a single source of income is one of the most dangerous financial positions you can be in. Not because of greed — but because dependence on one source creates fear, and fear lowers your vibration.\n\nBut this teaching goes deeper than money. Bob was really talking about CREATIVITY. Every person has multiple gifts, multiple interests, multiple ways they can serve the world. When you only express one, you\'re leaving potential on the table.\n\nYour recovery is unlocking parts of yourself that were dormant. Skills, passions, ideas — they\'re all coming back online as your brain heals. Don\'t ignore them. Explore them.\n\nToday\'s practice: Make a list of everything you\'re good at — not just professional skills, but things people come to you for. Advice? Creativity? Organizing? Support? Each one is a seed that could grow into something beautiful.' },
+  { day: 27, teacher: 'Wayne Dyer', title: 'The Tao', text: 'Wayne Dyer spent the last decade of his life immersed in the Tao Te Ching — the ancient Chinese text by Lao Tzu. He wrote an entire book translating it for modern life.\n\nThe core message of the Tao: stop forcing. The river doesn\'t try to flow. The flower doesn\'t try to bloom. The sun doesn\'t try to shine. Everything in nature fulfills its purpose without effort, without straining, without anxiety.\n\nYou are part of nature. And yet you\'ve been taught to push, grind, hustle, force. Wayne said: "In the Tao, doing nothing is actually doing everything — because you\'re allowing the intelligence of the universe to flow through you unobstructed."\n\nToday\'s practice: Find one area where you\'ve been forcing. Relationships. Career. Health. Recovery. Whatever it is — soften. Not give up — soften. Let it breathe. Trust the process. Be like water.' },
+  { day: 28, teacher: 'Neville Goddard', title: 'Live in the End', text: 'This is the teaching that ties everything together. Neville\'s entire philosophy in four words: LIVE IN THE END.\n\nDon\'t live in the middle — the space between where you are and where you want to be. That middle is anxiety, doubt, impatience. Don\'t live in the beginning — the space of hoping and wishing. That beginning is powerlessness.\n\nLive in the END. The desire fulfilled. The goal achieved. The person you\'re becoming — BE THEM NOW.\n\nFour weeks ago you made a decision. Every day since then, you\'ve been building new neural pathways, new habits, new beliefs. You are not the person who started this journey. You are already becoming someone new.\n\nToday\'s practice: Write a journal entry dated one year from today. Describe your life as if everything you\'ve been visualizing has come true. Be specific. Be detailed. Be grateful. Read it every morning this week.' },
+  { day: 29, teacher: 'Bob Proctor', title: 'The Secret to Living Is Giving', text: 'Bob Proctor said the universe operates on a law of circulation. Money, love, ideas, energy — they must flow. When you hoard anything, you block the flow. When you give, you create a vacuum that the universe rushes to fill.\n\nThis is counterintuitive. Most people think: "I\'ll give when I have enough." Bob said: "You\'ll never have enough until you give." Giving doesn\'t mean depleting yourself. It means recognizing that you are a CHANNEL, not a container. The more that flows through you, the more comes to you.\n\nToday\'s practice: Give something away today. It doesn\'t have to be money. Give a compliment. Give your time. Give your attention. Give encouragement. Notice how it makes YOU feel. That feeling is the law of circulation at work.' },
+  { day: 30, teacher: 'Wayne Dyer', title: 'I AM That I AM', text: 'Wayne Dyer said the two most powerful words in any language are "I AM." Whatever you attach to "I AM" becomes your identity, and your identity becomes your destiny.\n\n"I am an addict." "I am broken." "I am stuck." — these are prisons.\n"I am healing." "I am powerful." "I am free." — these are wings.\n\nBe ruthlessly careful with your "I am" statements. Every time you say "I am tired" or "I am stressed" or "I am not good enough" — your subconscious takes it as an instruction.\n\nYou are 30 days in. You have earned the right to say: "I am someone who shows up for themselves every single day. I am someone who chose freedom. I am someone who is rewiring their entire life."\n\nToday\'s practice: Write 10 "I AM" statements about the person you are becoming. Say them aloud. Say them with conviction. These are not lies — they are blueprints.' },
+  { day: 31, teacher: 'Neville Goddard', title: 'Mental Diets', text: 'Neville gave a famous lecture called "Mental Diets" where he compared your thought patterns to food. Just as you wouldn\'t eat poison and expect to be healthy, you cannot think poison and expect to thrive.\n\nA mental diet means monitoring every thought with the same attention you give to what you eat. When a negative thought enters — "I can\'t do this," "this will never work," "I\'m not strong enough" — you catch it and refuse to feed it. You starve it by replacing it with its opposite.\n\nThis is HARD. It may be the hardest thing Neville ever taught. But he said if you could maintain a strict mental diet for even three days, your life would begin to change in ways that seem miraculous.\n\nToday\'s practice: For the next 24 hours, catch every negative thought about yourself and immediately replace it with the opposite. "I can\'t" becomes "I can." "I\'m afraid" becomes "I am courageous." Track how many you catch. The number will surprise you.' },
+  { day: 32, teacher: 'Bob Proctor', title: 'Goal Setting From the Inside Out', text: 'Most people set goals they think they can achieve. Bob called these "Type A" goals. They\'re safe. Predictable. And they don\'t require any growth.\n\nThen there are "Type C" goals — goals that you have absolutely no idea HOW to achieve. Goals that scare you. Goals that would require you to become a completely different person.\n\nBob said only Type C goals are worth setting, because they\'re the only ones that force you to grow. And growth is the entire point of being alive.\n\nToday\'s practice: Set one goal that makes your stomach drop. Not a safe goal. A REAL goal. Write it down. Don\'t worry about the HOW — that\'s the universe\'s job. Your job is to hold the vision and become the person who achieves it.' },
+  { day: 33, teacher: 'Wayne Dyer', title: 'Surrender', text: 'Wayne Dyer\'s later work was all about surrender — and he was careful to distinguish surrender from giving up. Giving up says: "I can\'t." Surrender says: "I trust something larger than my ego to handle this."\n\nThe ego wants to control everything. When. How. Who. Where. And the ego\'s plans are always limited by what it has already experienced. Surrender opens you to possibilities your ego could never imagine.\n\nWayne said: "Stop acting as if life is a rehearsal. Live this day as if it were your last. The past is over and gone. The future is not guaranteed."\n\nToday\'s practice: Pick one thing you\'ve been trying to control. Just one. And let it go for today. Not forever — just today. Tell the universe: "I trust you with this." Then watch. The answers that come from surrender are always more elegant than the ones we force.' },
+  { day: 34, teacher: 'Neville Goddard', title: 'The Inner Conversation', text: 'Neville said that the conversation you carry on inside your head — the running commentary, the inner dialogue, the constant narrator — is the most powerful force in your life.\n\nMost people\'s inner conversation is destructive without them even knowing it. "I hope this works but it probably won\'t." "Things always go wrong for me." "I\'ll believe it when I see it."\n\nNeville said to reverse it: "You\'ll SEE it when you BELIEVE it." And belief starts with what you say to yourself in the privacy of your own mind.\n\nToday\'s practice: Listen to your inner conversation today without judgment. Just observe. What are you telling yourself about your life, your worth, your future? Write down the 3 most frequent inner phrases. Then rewrite each one as its empowered opposite.' },
+  { day: 35, teacher: 'Bob Proctor', title: 'Gratitude as a Discipline', text: 'Bob Proctor practiced gratitude not as a feel-good exercise, but as a DISCIPLINE. He said gratitude is the frequency that attracts abundance — and you must practice it especially when you don\'t feel like it.\n\n"When times are tough, that\'s when gratitude matters most. Anyone can be grateful when everything\'s going great. The master is grateful in the storm because they KNOW the storm is temporary and the growth is permanent."\n\nYou\'re building this muscle right now. Every gratitude entry in this app is a rep. And the stronger this muscle gets, the more naturally abundance flows to you.\n\nToday\'s practice: Write 5 things you\'re grateful for that you\'ve NEVER written before. Push past the obvious. Be grateful for your challenges. For the hard days. For the moments you almost gave in but didn\'t. That\'s advanced gratitude.' },
+]
+
+function ReadingsPage({ onBack }) {
+  const [readPages, readingsDb] = useSync('readings', 'readings')
+  const daysSinceQuit = Math.max(1, Math.ceil((Date.now() - QUIT_DATE) / 86400000))
+  const unlockedCount = Math.min(TEACHINGS.length, daysSinceQuit)
+  const readSet = new Set(readPages.map(r => r.page_num))
+  const [selectedDay, setSelectedDay] = useState(null)
+
+  const markRead = (pageNum) => {
+    if (!readSet.has(pageNum)) {
+      readingsDb.add({ page_num: pageNum })
+    }
+  }
+
+  const teaching = selectedDay !== null ? TEACHINGS[selectedDay] : null
+
+  return (
+    <div style={s.page}>
+      <div style={{ paddingTop: 20, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={selectedDay !== null ? () => setSelectedDay(null) : onBack}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', opacity: 0.5 }}>
+          {Icons.back}
+        </button>
+        <div>
+          <h1 style={s.greeting}>{selectedDay !== null ? `Day ${teaching.day}` : 'Daily Readings'}</h1>
+          <p style={s.subtitle}>
+            {selectedDay !== null ? teaching.teacher : `${readSet.size} of ${unlockedCount} pages read`}
+          </p>
+        </div>
+      </div>
+
+      {selectedDay !== null ? (
+        /* Reading view */
+        <div>
+          <div style={{ ...s.card, marginBottom: 14, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 14px 14px 0' }}>
+            <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.25)', marginBottom: 8 }}>
+              {teaching.teacher}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 300, color: '#fff', marginBottom: 16, lineHeight: 1.4 }}>
+              {teaching.title}
+            </div>
+            {teaching.text.split('\n\n').map((para, i) => (
+              <p key={i} style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: 16 }}>
+                {para}
+              </p>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+            <button onClick={() => { markRead(teaching.day); setSelectedDay(null) }}
+              style={{ ...s.btnPrimary, flex: 1 }}>
+              {readSet.has(teaching.day) ? '✓ Read' : 'Mark as Read'}
+            </button>
+            {selectedDay < unlockedCount - 1 && (
+              <button onClick={() => { markRead(teaching.day); setSelectedDay(selectedDay + 1) }}
+                style={{ ...s.btnSecondary, padding: '14px 20px' }}>
+                Next →
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Page list */
+        <div>
+          {/* Progress */}
+          <div style={{ ...s.card, marginBottom: 14, textAlign: 'center', padding: '20px 16px' }}>
+            <div style={{ fontSize: 28, fontWeight: 300, color: '#fff' }}>
+              {readSet.size}<span style={{ fontSize: 14, ...s.dim }}>/{unlockedCount}</span>
+            </div>
+            <div style={{ fontSize: 10, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Pages read</div>
+            <div style={{ ...s.track, marginTop: 12 }}>
+              <div style={s.fill(unlockedCount > 0 ? (readSet.size / unlockedCount) * 100 : 0)} />
+            </div>
+          </div>
+
+          {/* Today's reading highlight */}
+          {daysSinceQuit <= TEACHINGS.length && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={s.label}>TODAY'S READING</div>
+              <button onClick={() => setSelectedDay(daysSinceQuit - 1)}
+                style={{ ...s.card, width: '100%', textAlign: 'left', cursor: 'pointer', padding: '18px 16px',
+                  border: readSet.has(daysSinceQuit) ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.2)',
+                  transition: 'all 0.2s' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>
+                      {TEACHINGS[daysSinceQuit - 1].teacher}
+                    </div>
+                    <div style={s.cardTitle}>{TEACHINGS[daysSinceQuit - 1].title}</div>
+                    <div style={{ fontSize: 11, ...s.dim, marginTop: 4 }}>Day {daysSinceQuit}</div>
+                  </div>
+                  {readSet.has(daysSinceQuit) ? (
+                    <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>✓</span>
+                  ) : (
+                    <span style={{ fontSize: 10, fontWeight: 600, color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: 999 }}>NEW</span>
+                  )}
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* All pages */}
+          <div style={s.label}>ALL PAGES</div>
+          {TEACHINGS.slice(0, unlockedCount).map((t, i) => {
+            const isRead = readSet.has(t.day)
+            const isLocked = i >= unlockedCount
+            return (
+              <button key={t.day} onClick={() => !isLocked && setSelectedDay(i)}
+                style={{ ...s.card, marginBottom: 6, width: '100%', textAlign: 'left', cursor: isLocked ? 'default' : 'pointer',
+                  opacity: isLocked ? 0.3 : 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', transition: 'all 0.2s' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', border: isRead ? '2px solid rgba(255,255,255,0.3)' : '2px solid rgba(255,255,255,0.1)',
+                  background: isRead ? 'rgba(255,255,255,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {isRead ? <span style={{ fontSize: 11, color: '#fff' }}>✓</span> : <span style={{ fontSize: 10, ...s.dim }}>{t.day}</span>}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#fff' }}>{t.title}</div>
+                  <div style={{ fontSize: 9, ...s.dim, marginTop: 2 }}>{t.teacher}</div>
+                </div>
+                <span style={{ ...s.dim, fontSize: 12 }}>{Icons.chevron}</span>
+              </button>
+            )
+          })}
+
+          {unlockedCount < TEACHINGS.length && (
+            <div style={{ textAlign: 'center', padding: '20px 0', ...s.dim, fontSize: 11 }}>
+              {TEACHINGS.length - unlockedCount} more pages unlock as your journey continues
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
