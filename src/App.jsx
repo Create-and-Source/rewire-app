@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -497,6 +497,7 @@ export default function App() {
             {page === 'timer' && <TimerPage onBack={() => setPage('more')} />}
             {page === 'health' && <HealthPage onBack={() => setPage('more')} />}
             {page === 'tasks' && <TasksPage onBack={() => setPage('more')} />}
+            {page === 'run' && <RunPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -1082,6 +1083,7 @@ function MorePage({ setPage }) {
   const items = [
     { id: 'dreams', label: 'Dream Journal', sub: 'Your brain is learning to dream again' },
     { id: 'nourish', label: 'Nourish', sub: 'What food does for your brain' },
+    { id: 'run', label: 'Run Tracker', sub: 'GPS tracking, distance, pace' },
     { id: 'cravings', label: 'Craving Tracker', sub: 'Every resist is a win' },
     { id: 'water', label: 'Water Tracker', sub: 'Your brain is 73% water' },
     { id: 'progress', label: 'Progress Photos', sub: 'Watch yourself transform' },
@@ -1994,6 +1996,229 @@ function TasksPage({ onBack }) {
         <p style={{ fontSize: 11, ...s.dim, fontStyle: 'italic', lineHeight: 1.6 }}>
           "{NEVILLE_QUOTES[Math.floor(Date.now() / 86400000) % NEVILLE_QUOTES.length]}"
         </p>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
+// RUN TRACKER — GPS distance, pace, route
+// ============================================================
+
+const haversine = (a, b) => {
+  const R = 3958.8 // miles
+  const dLat = (b.lat - a.lat) * Math.PI / 180
+  const dLon = (b.lng - a.lng) * Math.PI / 180
+  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180) * Math.cos(b.lat*Math.PI/180) * Math.sin(dLon/2)**2
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x))
+}
+
+function RunPage({ onBack }) {
+  const [runs, runsDb] = useSync('runs', 'runs')
+  const [running, setRunning] = useState(false)
+  const [route, setRoute] = useState([])
+  const [distance, setDistance] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+  const [startTime, setStartTime] = useState(null)
+  const watchRef = useRef(null)
+  const canvasRef = useRef(null)
+  const timerRef = useRef(null)
+
+  // Timer
+  useEffect(() => {
+    if (!running || !startTime) return
+    const tick = () => setElapsed(Math.floor((Date.now() - startTime) / 1000))
+    timerRef.current = setInterval(tick, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [running, startTime])
+
+  // Draw route on canvas
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || route.length < 2) return
+    const ctx = canvas.getContext('2d')
+    const w = canvas.width = canvas.offsetWidth * 2
+    const h = canvas.height = canvas.offsetHeight * 2
+    ctx.scale(2, 2)
+    ctx.clearRect(0, 0, w, h)
+
+    const lats = route.map(p => p.lat), lngs = route.map(p => p.lng)
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats)
+    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs)
+    const pad = 30
+    const dw = canvas.offsetWidth - pad * 2
+    const dh = canvas.offsetHeight - pad * 2
+    const rangeL = maxLat - minLat || 0.001
+    const rangeN = maxLng - minLng || 0.001
+
+    const toX = lng => pad + ((lng - minLng) / rangeN) * dw
+    const toY = lat => pad + ((maxLat - lat) / rangeL) * dh
+
+    // Route line
+    ctx.beginPath()
+    ctx.moveTo(toX(route[0].lng), toY(route[0].lat))
+    route.forEach((p, i) => { if (i > 0) ctx.lineTo(toX(p.lng), toY(p.lat)) })
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.stroke()
+
+    // Start dot
+    ctx.beginPath()
+    ctx.arc(toX(route[0].lng), toY(route[0].lat), 4, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'
+    ctx.fill()
+
+    // Current position dot
+    const last = route[route.length - 1]
+    ctx.beginPath()
+    ctx.arc(toX(last.lng), toY(last.lat), 5, 0, Math.PI * 2)
+    ctx.fillStyle = '#fff'
+    ctx.fill()
+  }, [route])
+
+  const startRun = () => {
+    if (!navigator.geolocation) { alert('GPS not available'); return }
+    setRunning(true)
+    setStartTime(Date.now())
+    setRoute([])
+    setDistance(0)
+    setElapsed(0)
+
+    watchRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const point = { lat: pos.coords.latitude, lng: pos.coords.longitude, t: Date.now() }
+        setRoute(prev => {
+          const updated = [...prev, point]
+          if (prev.length > 0) {
+            const d = haversine(prev[prev.length - 1], point)
+            if (d < 0.5) setDistance(dist => dist + d) // ignore GPS jumps > 0.5mi
+          }
+          return updated
+        })
+      },
+      (err) => console.log('GPS error:', err.message),
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+    )
+  }
+
+  const endRun = () => {
+    if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current)
+    clearInterval(timerRef.current)
+    setRunning(false)
+
+    if (distance > 0.01) {
+      const paceMin = elapsed > 0 && distance > 0 ? elapsed / 60 / distance : 0
+      const paceStr = paceMin > 0 ? `${Math.floor(paceMin)}:${String(Math.floor((paceMin % 1) * 60)).padStart(2, '0')}` : '--'
+      runsDb.add({ distance: Math.round(distance * 100) / 100, duration: elapsed, pace: paceStr, route })
+    }
+    setRoute([]); setDistance(0); setElapsed(0); setStartTime(null)
+  }
+
+  const fmtDur = (secs) => {
+    const h = Math.floor(secs / 3600)
+    const m = Math.floor((secs % 3600) / 60)
+    const sc = secs % 60
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`
+    return `${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`
+  }
+
+  const currentPace = elapsed > 0 && distance > 0.01
+    ? (() => { const p = elapsed / 60 / distance; return `${Math.floor(p)}:${String(Math.floor((p % 1) * 60)).padStart(2, '0')}` })()
+    : '--:--'
+
+  return (
+    <div style={s.page}>
+      <div style={{ paddingTop: 20, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', opacity: 0.5 }}>
+          {Icons.back}
+        </button>
+        <div>
+          <h1 style={s.greeting}>Run</h1>
+          <p style={s.subtitle}>{running ? 'Tracking your run...' : `${runs.length} runs logged`}</p>
+        </div>
+      </div>
+
+      {/* Route map */}
+      <div style={{ ...s.card, marginBottom: 14, padding: 0, overflow: 'hidden', position: 'relative' }}>
+        <canvas ref={canvasRef}
+          style={{ width: '100%', height: 200, display: 'block', background: running && route.length > 1 ? 'rgba(255,255,255,0.02)' : 'transparent' }} />
+        {!running && route.length < 2 && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ fontSize: 11, ...s.dim }}>Your route will appear here</p>
+          </div>
+        )}
+      </div>
+
+      {/* Live stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+        <div style={{ ...s.card, textAlign: 'center', padding: '16px 8px' }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: '#fff' }}>{distance.toFixed(2)}</div>
+          <div style={{ fontSize: 9, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Miles</div>
+        </div>
+        <div style={{ ...s.card, textAlign: 'center', padding: '16px 8px' }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: '#fff' }}>{fmtDur(elapsed)}</div>
+          <div style={{ fontSize: 9, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Time</div>
+        </div>
+        <div style={{ ...s.card, textAlign: 'center', padding: '16px 8px' }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: '#fff' }}>{currentPace}</div>
+          <div style={{ fontSize: 9, ...s.dim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>Pace /mi</div>
+        </div>
+      </div>
+
+      {/* Start / End button */}
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        {running ? (
+          <button onClick={endRun}
+            style={{ ...s.btnSecondary, padding: '16px 48px', fontSize: 14, fontWeight: 600, letterSpacing: 1,
+              background: 'rgba(255,100,100,0.1)', borderColor: 'rgba(255,100,100,0.25)', color: '#fff' }}>
+            END RUN
+          </button>
+        ) : (
+          <button onClick={startRun}
+            style={{ ...s.btnPrimary, width: 'auto', padding: '16px 48px', fontSize: 14, fontWeight: 600, letterSpacing: 1, display: 'inline-block' }}>
+            START RUN
+          </button>
+        )}
+      </div>
+
+      {/* Run history */}
+      {runs.length > 0 && (
+        <>
+          <div style={s.label}>HISTORY</div>
+          {runs.map(run => {
+            const runRoute = run.route || []
+            return (
+              <div key={run.id} style={{ ...s.card, marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 10, ...s.dim }}>{fmtDate(run.created_at)}</span>
+                  <span style={{ fontSize: 10, ...s.dim }}>{runRoute.length} GPS points</span>
+                </div>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 300, color: '#fff' }}>{run.distance?.toFixed(2)} mi</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 300, ...s.mid }}>{fmtDur(run.duration)}</div>
+                    <div style={{ fontSize: 9, ...s.dim }}>time</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 300, ...s.mid }}>{run.pace || '--'}</div>
+                    <div style={{ fontSize: 9, ...s.dim }}>pace</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 100 }}>
+        <p style={{ fontSize: 11, ...s.dim, fontStyle: 'italic', lineHeight: 1.6 }}>
+          "An awakened imagination works with a purpose."
+        </p>
+        <p style={{ fontSize: 9, ...s.dim, marginTop: 4, letterSpacing: 2, textTransform: 'uppercase' }}>Neville Goddard</p>
       </div>
     </div>
   )
