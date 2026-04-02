@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -502,6 +502,7 @@ export default function App() {
             {page === 'bathroom' && <BathroomPage onBack={() => setPage('more')} />}
             {page === 'energy' && <EnergyPage onBack={() => setPage('more')} />}
             {page === 'journal' && <JournalPage onBack={() => setPage('more')} />}
+            {page === 'surrender' && <GiveToGodPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -622,6 +623,7 @@ function HomePage({ time, quote, setPage }) {
         <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
+            { id: 'surrender', icon: '🙏', label: 'Give to God' },
             { id: 'energy', icon: '⚡', label: 'Energy' },
             { id: 'journal', icon: '📝', label: 'Journal' },
             { id: 'dreams', icon: '🌙', label: 'Dreams' },
@@ -1156,6 +1158,7 @@ function MorePage({ setPage }) {
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
     { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
     { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
+    { id: 'surrender', label: 'Give It to God', sub: 'Release what isn\'t yours to carry' },
     { id: 'energy', label: 'Energy Tracker', sub: 'Track it, watch it come back' },
     { id: 'journal', label: 'Journal', sub: 'Process, release, grow' },
     { id: 'readings', label: 'Daily Readings', sub: 'Neville, Proctor, Dyer' },
@@ -2967,6 +2970,165 @@ function JournalPage({ onBack }) {
         <div style={{ textAlign: 'center', padding: '40px 0', ...s.dim }}>
           <p style={{ fontSize: 15 }}>Your journal is waiting</p>
           <p style={{ fontSize: 13, marginTop: 6, opacity: 0.6 }}>Writing during recovery helps your brain process emotions it numbed for a long time</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// GIVE IT TO GOD
+// ============================================================
+
+const NEVILLE_SURRENDER = [
+  "To pray successfully, you must yield to the wish, not to the worry.",
+  "Let go and let God. Your Father knoweth what things ye have need of.",
+  "The moment you accept the wish fulfilled, the burden is lifted.",
+  "Stop wrestling. Assume the feeling of the answered prayer and rest in it.",
+  "You do not fight against your problem. You withdraw from it into the feeling of the wish fulfilled.",
+  "Be still and know that I am God. Stillness is the surrender.",
+  "The prayer of surrender is not giving up — it is giving over.",
+  "When you feel it real, you have planted the seed. Now leave the garden.",
+  "Your anxiety is you trying to do God's work. Release it. It is not your burden to carry.",
+  "Imagination, not willpower, creates. Stop pushing. Start assuming.",
+  "The state of fulfilled desire has no anxiety in it. If you are anxious, you have not truly let go.",
+  "Go to the end. Dwell in it. Then drop it. The bridge of incidents will form.",
+]
+
+function GiveToGodPage({ onBack }) {
+  const [released, releasedDb] = useSync('released_worries', 'released_worries')
+  const [worry, setWorry] = useState('')
+  const [releasing, setReleasing] = useState(false)
+  const [releaseQuote, setReleaseQuote] = useState(null)
+  const mic = useSpeech(setWorry)
+
+  const release = () => {
+    if (!worry.trim()) return
+    mic.stop()
+    setReleasing(true)
+    setReleaseQuote(NEVILLE_SURRENDER[Math.floor(Math.random() * NEVILLE_SURRENDER.length)])
+    releasedDb.add({ text: worry.trim() })
+    setTimeout(() => {
+      setWorry('')
+      setTimeout(() => setReleasing(false), 3000)
+    }, 500)
+  }
+
+  const totalReleased = released.length
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 28 }}>
+        <h1 style={s.greeting}>Give It to God</h1>
+        <p style={s.subtitle}>Release what isn't yours to carry</p>
+      </div>
+
+      {/* Release animation */}
+      <AnimatePresence>
+        {releasing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(13,13,13,0.95)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+            <motion.div
+              initial={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 0, y: -120, scale: 0.5 }}
+              transition={{ duration: 2.5, ease: 'easeOut' }}
+              style={{ fontSize: 48, marginBottom: 40 }}>
+              ✦
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 1.5 }}
+              style={{ fontSize: 22, fontWeight: 300, color: 'rgba(255,255,255,0.7)', textAlign: 'center', lineHeight: 1.7, fontStyle: 'italic', maxWidth: 320 }}>
+              Released.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8, duration: 1.5 }}
+              style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.7, marginTop: 20, maxWidth: 300 }}>
+              "{releaseQuote}"
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.5, duration: 1 }}
+              style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', marginTop: 16 }}>
+              Neville Goddard
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Neville quote */}
+      <div style={{ ...s.card, marginBottom: 14, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 16px 16px 0' }}>
+        <p style={{ fontSize: 16, fontWeight: 300, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.7 }}>
+          "To pray successfully, you must yield to the wish, not to the worry. The moment you accept the wish fulfilled, the burden is lifted."
+        </p>
+        <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 10 }}>Neville Goddard</p>
+      </div>
+
+      {/* Write your worry */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>WHAT'S WEIGHING ON YOU?</div>
+        <textarea value={worry} onChange={e => setWorry(e.target.value)}
+          placeholder="Write it here... then let it go"
+          rows={5} style={{ ...s.textarea, minHeight: 120 }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
+          <MicBtn listening={mic.listening} onPress={() => mic.toggle(worry)} />
+          <button onClick={release} disabled={!worry.trim()}
+            style={{ padding: '16px 32px', borderRadius: 999, background: worry.trim() ? 'rgba(255,255,255,0.1)' : 'transparent',
+              color: '#fff', fontSize: 17, fontWeight: 500, border: worry.trim() ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.06)',
+              cursor: worry.trim() ? 'pointer' : 'default', transition: 'all 0.3s', opacity: worry.trim() ? 1 : 0.3, letterSpacing: 0.5 }}>
+            Release to God
+          </button>
+        </div>
+      </div>
+
+      {/* Counter */}
+      {totalReleased > 0 && (
+        <div style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '28px 20px' }}>
+          <div style={{ fontSize: 48, fontWeight: 200, color: '#fff' }}>{totalReleased}</div>
+          <div style={{ fontSize: 15, ...s.dim, marginTop: 6 }}>{totalReleased === 1 ? 'worry released' : 'worries released'}</div>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 12, lineHeight: 1.6 }}>
+            Every one of these is something you chose not to carry alone.
+          </p>
+        </div>
+      )}
+
+      {/* What surrender means */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.label}>THE PRACTICE</div>
+        <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8 }}>
+          <p style={{ marginBottom: 14 }}>Neville taught that worry is praying for what you don't want. Every anxious thought is an act of imagination — just pointed the wrong way.</p>
+          <p style={{ marginBottom: 14 }}>When you write your worry and release it, you're doing two things:</p>
+          <p style={{ marginBottom: 8, paddingLeft: 16 }}>1. <strong style={{ color: '#fff' }}>Acknowledging it</strong> — not suppressing, not pretending it doesn't exist</p>
+          <p style={{ marginBottom: 8, paddingLeft: 16 }}>2. <strong style={{ color: '#fff' }}>Surrendering it</strong> — choosing to trust that your deeper self (God, consciousness, the I AM) is already handling it</p>
+          <p style={{ marginTop: 14 }}>The bridge of incidents will form. Your only job is to feel the relief of having let go.</p>
+        </div>
+      </div>
+
+      {/* Recent releases — no details, just timestamps for privacy */}
+      {released.length > 0 && (
+        <div>
+          <div style={s.label}>RELEASED</div>
+          {released.slice(0, 10).map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px' }}>
+              <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.15)' }}>✦</span>
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', flex: 1 }}>
+                {e.text?.slice(0, 40)}{e.text?.length > 40 ? '...' : ''}
+              </span>
+              <span style={{ fontSize: 12, ...s.dim }}>{fmtDate(e.created_at || e.date)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
