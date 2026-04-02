@@ -398,9 +398,18 @@ export default function App() {
 
       {/* Quote bar */}
       <div style={s.quoteBar}>
-        <div style={s.quoteInner}>
-          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>✦</span>
-          <p style={s.quoteText}>"{quote}" — Neville Goddard</p>
+        <div style={{ ...s.quoteInner, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>✦</span>
+            <p style={s.quoteText}>"{quote}" — Neville Goddard</p>
+          </div>
+          <button onClick={() => setUnlocked(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', flexShrink: 0 }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+          </button>
         </div>
       </div>
 
