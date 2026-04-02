@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -503,6 +503,7 @@ export default function App() {
             {page === 'energy' && <EnergyPage onBack={() => setPage('more')} />}
             {page === 'journal' && <JournalPage onBack={() => setPage('more')} />}
             {page === 'surrender' && <GiveToGodPage onBack={() => setPage('more')} />}
+            {page === 'checkin' && <CheckInPage onBack={() => setPage('more')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -623,6 +624,7 @@ function HomePage({ time, quote, setPage }) {
         <div style={{ ...s.label, marginBottom: 10 }}>YOUR TOOLS</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
+            { id: 'checkin', icon: '☀️', label: 'Check-in' },
             { id: 'surrender', icon: '🙏', label: 'Give to God' },
             { id: 'energy', icon: '⚡', label: 'Energy' },
             { id: 'journal', icon: '📝', label: 'Journal' },
@@ -1158,6 +1160,7 @@ function MorePage({ setPage }) {
     { id: 'timer', label: 'Meditation Timer', sub: 'Enter the silence' },
     { id: 'health', label: 'Health', sub: 'Apple Health + daily check-in' },
     { id: 'tasks', label: 'Tasks', sub: 'Your daily to-dos' },
+    { id: 'checkin', label: 'Daily Check-in', sub: 'Morning + night ritual' },
     { id: 'surrender', label: 'Give It to God', sub: 'Release what isn\'t yours to carry' },
     { id: 'energy', label: 'Energy Tracker', sub: 'Track it, watch it come back' },
     { id: 'journal', label: 'Journal', sub: 'Process, release, grow' },
@@ -3127,6 +3130,274 @@ function GiveToGodPage({ onBack }) {
                 {e.text?.slice(0, 40)}{e.text?.length > 40 ? '...' : ''}
               </span>
               <span style={{ fontSize: 12, ...s.dim }}>{fmtDate(e.created_at || e.date)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// DAILY CHECK-IN (Morning + Night)
+// ============================================================
+
+function CheckInPage({ onBack }) {
+  const [checkins, checkinDb] = useSync('checkins', 'checkins')
+  const today = new Date().toDateString()
+  const hour = new Date().getHours()
+  const isMorning = hour < 15
+  const todayCheckins = checkins.filter(e => new Date(e.created_at || e.date).toDateString() === today)
+  const hasMorning = todayCheckins.some(e => e.type === 'morning')
+  const hasNight = todayCheckins.some(e => e.type === 'night')
+
+  // Morning state
+  const [sleep, setSleep] = useState(null)
+  const [energy, setEnergy] = useState(null)
+  const [intention, setIntention] = useState('')
+  const micI = useSpeech(setIntention)
+
+  // Night state
+  const [dayRating, setDayRating] = useState(null)
+  const [win, setWin] = useState('')
+  const [release, setRelease] = useState('')
+  const micW = useSpeech(setWin)
+  const micR = useSpeech(setRelease)
+
+  const [saved, setSaved] = useState(false)
+
+  const sleepOptions = [
+    { emoji: '😫', label: 'Terrible' },
+    { emoji: '😴', label: 'Poor' },
+    { emoji: '😐', label: 'Okay' },
+    { emoji: '😊', label: 'Good' },
+    { emoji: '🌟', label: 'Great' },
+  ]
+
+  const energyOptions = [
+    { emoji: '🪫', label: 'Empty' },
+    { emoji: '😴', label: 'Low' },
+    { emoji: '😐', label: 'Okay' },
+    { emoji: '⚡', label: 'Good' },
+    { emoji: '🔥', label: 'High' },
+  ]
+
+  const saveMorning = () => {
+    if (sleep === null || energy === null) return
+    micI.stop()
+    checkinDb.add({
+      type: 'morning',
+      sleep_rating: sleep + 1,
+      sleep_label: sleepOptions[sleep].label,
+      sleep_emoji: sleepOptions[sleep].emoji,
+      energy_rating: energy + 1,
+      energy_label: energyOptions[energy].label,
+      energy_emoji: energyOptions[energy].emoji,
+      intention: intention.trim() || null,
+    })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+    setSleep(null); setEnergy(null); setIntention('')
+  }
+
+  const saveNight = () => {
+    if (dayRating === null) return
+    micW.stop(); micR.stop()
+    checkinDb.add({
+      type: 'night',
+      day_rating: dayRating + 1,
+      win: win.trim() || null,
+      release_text: release.trim() || null,
+    })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+    setDayRating(null); setWin(''); setRelease('')
+  }
+
+  // Stats
+  const last7 = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    const ds = d.toDateString()
+    const dayCheckins = checkins.filter(e => new Date(e.created_at || e.date).toDateString() === ds)
+    const morning = dayCheckins.find(e => e.type === 'morning')
+    const night = dayCheckins.find(e => e.type === 'night')
+    last7.push({ date: d, morning, night })
+  }
+
+  return (
+    <div style={s.page}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+      <div style={{ paddingTop: 12, marginBottom: 28 }}>
+        <h1 style={s.greeting}>{isMorning ? 'Good Morning' : 'Good Night'}</h1>
+        <p style={s.subtitle}>{isMorning ? 'Set the tone for today' : 'Close out the day with intention'}</p>
+      </div>
+
+      <AnimatePresence>
+        {saved && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <span style={{ fontSize: 28 }}>✦</span>
+            <p style={{ fontSize: 16, color: '#fff', marginTop: 8 }}>Saved</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MORNING CHECK-IN */}
+      {isMorning && !hasMorning && !saved && (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>MORNING CHECK-IN</div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>How did you sleep?</p>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
+            {sleepOptions.map((o, i) => (
+              <button key={i} onClick={() => setSleep(i)}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  background: sleep === i ? 'rgba(255,255,255,0.08)' : 'none',
+                  border: sleep === i ? '1px solid rgba(255,255,255,0.15)' : '1px solid transparent',
+                  borderRadius: 12, padding: '12px 4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <span style={{ fontSize: 28 }}>{o.emoji}</span>
+                <span style={{ fontSize: 11, ...s.dim }}>{o.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>Energy level?</p>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
+            {energyOptions.map((o, i) => (
+              <button key={i} onClick={() => setEnergy(i)}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  background: energy === i ? 'rgba(255,255,255,0.08)' : 'none',
+                  border: energy === i ? '1px solid rgba(255,255,255,0.15)' : '1px solid transparent',
+                  borderRadius: 12, padding: '12px 4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <span style={{ fontSize: 28 }}>{o.emoji}</span>
+                <span style={{ fontSize: 11, ...s.dim }}>{o.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>What's your intention today?</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <input value={intention} onChange={e => setIntention(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveMorning()}
+              placeholder="I intend to..." style={{ ...s.input, flex: 1 }} />
+            <MicBtn listening={micI.listening} onPress={() => micI.toggle(intention)} small />
+          </div>
+
+          <button onClick={saveMorning} disabled={sleep === null || energy === null}
+            style={{ ...s.btnPrimary, opacity: (sleep !== null && energy !== null) ? 1 : 0.3 }}>
+            Start My Day
+          </button>
+        </div>
+      )}
+
+      {isMorning && hasMorning && !saved && (
+        <div style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '28px 20px' }}>
+          <span style={{ fontSize: 36 }}>☀️</span>
+          <p style={{ fontSize: 17, color: '#fff', marginTop: 12 }}>Morning check-in complete</p>
+          <p style={{ fontSize: 14, ...s.dim, marginTop: 8 }}>Come back tonight to close out the day</p>
+        </div>
+      )}
+
+      {/* NIGHT CHECK-IN */}
+      {!isMorning && !hasNight && !saved && (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>NIGHT REFLECTION</div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>How was your day? (1-10)</p>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 24 }}>
+            {[1,2,3,4,5,6,7,8,9,10].map(n => (
+              <button key={n} onClick={() => setDayRating(n - 1)}
+                style={{ flex: 1, padding: '14px 0', borderRadius: 10, fontSize: 16, fontWeight: 500,
+                  background: dayRating === n - 1 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.03)',
+                  border: dayRating === n - 1 ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                  color: dayRating === n - 1 ? '#fff' : 'rgba(255,255,255,0.3)',
+                  cursor: 'pointer', transition: 'all 0.2s' }}>
+                {n}
+              </button>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>One win from today</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            <input value={win} onChange={e => setWin(e.target.value)}
+              placeholder="Something I'm proud of..." style={{ ...s.input, flex: 1 }} />
+            <MicBtn listening={micW.listening} onPress={() => micW.toggle(win)} small />
+          </div>
+
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>Something to release</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            <input value={release} onChange={e => setRelease(e.target.value)}
+              placeholder="Letting go of..." style={{ ...s.input, flex: 1 }} />
+            <MicBtn listening={micR.listening} onPress={() => micR.toggle(release)} small />
+          </div>
+
+          <button onClick={saveNight} disabled={dayRating === null}
+            style={{ ...s.btnPrimary, opacity: dayRating !== null ? 1 : 0.3 }}>
+            Close My Day
+          </button>
+        </div>
+      )}
+
+      {!isMorning && hasNight && !saved && (
+        <div style={{ ...s.card, textAlign: 'center', marginBottom: 14, padding: '28px 20px' }}>
+          <span style={{ fontSize: 36 }}>🌙</span>
+          <p style={{ fontSize: 17, color: '#fff', marginTop: 12 }}>Night reflection complete</p>
+          <p style={{ fontSize: 14, ...s.dim, marginTop: 8 }}>Rest well. Tomorrow is another day of rewiring.</p>
+        </div>
+      )}
+
+      {/* 7-day overview */}
+      {checkins.length > 0 && (
+        <div style={{ ...s.card, marginBottom: 14 }}>
+          <div style={s.label}>YOUR WEEK</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {last7.map((d, i) => (
+              <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, ...s.dim, marginBottom: 8 }}>{d.date.toLocaleDateString('en-US', { weekday: 'narrow' })}</div>
+                <div style={{ width: '100%', padding: '8px 0', borderRadius: 8,
+                  background: (d.morning || d.night) ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+                  border: d.date.toDateString() === today ? '1px solid rgba(255,255,255,0.15)' : '1px solid transparent' }}>
+                  <div style={{ fontSize: 12 }}>{d.morning ? d.morning.energy_emoji || '☀️' : '·'}</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }}>{d.night ? '🌙' : '·'}</div>
+                  {d.night?.day_rating !== undefined && (
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{(d.night.day_rating || 0) + 1}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent check-ins */}
+      {checkins.length > 0 && (
+        <div>
+          <div style={s.label}>RECENT</div>
+          {checkins.slice(0, 14).map(e => (
+            <div key={e.id} style={{ ...s.card, marginBottom: 6, padding: '14px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <span style={{ fontSize: 18 }}>{e.type === 'morning' ? '☀️' : '🌙'}</span>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#fff', flex: 1 }}>
+                  {e.type === 'morning' ? 'Morning' : 'Night'}
+                </span>
+                <span style={{ fontSize: 12, ...s.dim }}>{fmtDate(e.created_at || e.date)}</span>
+              </div>
+              {e.type === 'morning' && (
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+                  Sleep: {e.sleep_emoji} {e.sleep_label} · Energy: {e.energy_emoji} {e.energy_label}
+                  {e.intention && <div style={{ marginTop: 4, fontStyle: 'italic' }}>"{e.intention}"</div>}
+                </div>
+              )}
+              {e.type === 'night' && (
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+                  Day: {(e.day_rating || 0) + 1}/10
+                  {e.win && <div style={{ marginTop: 4 }}>Win: {e.win}</div>}
+                  {e.release_text && <div style={{ marginTop: 2, fontStyle: 'italic' }}>Released: {e.release_text}</div>}
+                </div>
+              )}
             </div>
           ))}
         </div>
