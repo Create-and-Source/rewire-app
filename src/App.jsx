@@ -469,7 +469,7 @@ export default function App() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin'].includes(page)))}>
+            <button key={t.id} onClick={() => setPage(t.id)} style={s.navItem(page === t.id || (t.id === 'more' && ['water','progress','vision','visualize','timer','health','brain','cravings','dreams','nourish','tasks','run','readings','bathroom','energy','journal','surrender','checkin','sos'].includes(page)))}>
               <span style={{ color: '#fff' }}>{t.icon}</span>
               <span style={s.navLabel}>{t.label}</span>
             </button>
@@ -504,6 +504,7 @@ export default function App() {
             {page === 'journal' && <JournalPage onBack={() => setPage('more')} />}
             {page === 'surrender' && <GiveToGodPage onBack={() => setPage('more')} />}
             {page === 'checkin' && <CheckInPage onBack={() => setPage('more')} />}
+            {page === 'sos' && <SOSPage onBack={() => setPage('home')} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -548,6 +549,18 @@ function HomePage({ time, quote, setPage }) {
         <h1 style={s.greeting}>{getGreeting()}</h1>
         <p style={{ ...s.subtitle, marginTop: 6 }}>This is your journey</p>
       </div>
+
+      {/* SOS Button */}
+      <button onClick={() => setPage('sos')}
+        style={{ width: '100%', ...s.card, marginBottom: 14, textAlign: 'center', cursor: 'pointer',
+          padding: '18px 20px', border: '1px solid rgba(255,100,100,0.15)', background: 'rgba(255,100,100,0.04)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'all 0.2s' }}>
+        <span style={{ fontSize: 22 }}>🆘</span>
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Craving hitting hard?</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Tap here — breathing, timer, your reasons</div>
+        </div>
+      </button>
 
       {/* Timer card */}
       <div style={{ ...s.card, textAlign: 'center', marginBottom: 14 }}>
@@ -3415,6 +3428,239 @@ function CheckInPage({ onBack }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// SOS — EMERGENCY CRAVING SUPPORT
+// ============================================================
+
+const SOS_QUOTES = [
+  "This craving is not you. It is a wave passing through you. You are the ocean.",
+  "You did not come this far to only come this far.",
+  "The old man must die before the new man can be born. Let this craving die.",
+  "Feeling is the secret — and right now, feel the pride of having resisted.",
+  "This moment will pass. The version of you on the other side of it is stronger.",
+  "Your brain is literally rewiring right now. This discomfort is construction noise.",
+  "Every craving you resist builds a neural pathway of power.",
+  "Go to the end. See yourself 90 days from now. How does that person feel about this moment?",
+  "You are not giving something up. You are waking something up.",
+  "The bridge of incidents is forming. This craving is one of the bridges — walk across it.",
+  "Assume the feeling of the wish fulfilled. You are already free.",
+  "Nothing comes from without. This strength comes from within you.",
+]
+
+function SOSPage({ onBack }) {
+  const [reasons, reasonsDb] = useSync('quit_reasons', 'quit_reasons')
+  const [newReason, setNewReason] = useState('')
+  const [phase, setPhase] = useState('breathe') // breathe, timer, reasons, quote
+  const [breathStep, setBreathStep] = useState(0) // 0=in, 1=hold, 2=out, 3=hold
+  const [breathCount, setBreathCount] = useState(0)
+  const [timerLeft, setTimerLeft] = useState(900) // 15 minutes
+  const [timerRunning, setTimerRunning] = useState(false)
+  const [quote] = useState(SOS_QUOTES[Math.floor(Math.random() * SOS_QUOTES.length)])
+
+  // Breathing cycle: 4-7-8 technique
+  const breathLabels = ['Breathe In', 'Hold', 'Breathe Out', 'Hold']
+  const breathDurations = [4, 7, 8, 4] // seconds
+
+  useEffect(() => {
+    if (phase !== 'breathe') return
+    const dur = breathDurations[breathStep] * 1000
+    const t = setTimeout(() => {
+      const nextStep = (breathStep + 1) % 4
+      setBreathStep(nextStep)
+      if (nextStep === 0) setBreathCount(c => c + 1)
+    }, dur)
+    return () => clearTimeout(t)
+  }, [phase, breathStep])
+
+  // Craving timer
+  useEffect(() => {
+    if (!timerRunning || timerLeft <= 0) return
+    const i = setInterval(() => setTimerLeft(t => t - 1), 1000)
+    return () => clearInterval(i)
+  }, [timerRunning, timerLeft])
+
+  const startTimer = () => { setTimerRunning(true); setPhase('timer') }
+
+  const addReason = () => {
+    if (!newReason.trim()) return
+    reasonsDb.add({ text: newReason.trim() })
+    setNewReason('')
+  }
+
+  const fmtTimer = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+
+  // Breathing animation scale
+  const breathScale = breathStep === 0 ? 1.4 : breathStep === 2 ? 0.8 : breathStep === 1 ? 1.4 : 0.8
+
+  return (
+    <div style={{ ...s.page, background: '#0D0D0D', minHeight: '100vh' }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', ...s.dim, fontSize: 14, paddingTop: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ transform: 'rotate(180deg)', display: 'inline-block' }}>{Icons.chevron}</span> Back
+      </button>
+
+      <div style={{ paddingTop: 12, marginBottom: 20 }}>
+        <h1 style={{ fontSize: 32, fontWeight: 300, color: '#fff' }}>You're okay.</h1>
+        <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>This will pass. Stay right here.</p>
+      </div>
+
+      {/* Phase tabs */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto' }}>
+        {[
+          { id: 'breathe', label: 'Breathe' },
+          { id: 'timer', label: 'Ride the Wave' },
+          { id: 'reasons', label: 'Why I Quit' },
+          { id: 'quote', label: 'Anchor' },
+        ].map(p => (
+          <button key={p.id} onClick={() => { setPhase(p.id); if (p.id === 'timer' && !timerRunning) startTimer() }}
+            style={phase === p.id ? s.pillActive : s.pill}>
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* BREATHE */}
+      {phase === 'breathe' && (
+        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ ...s.card, padding: '50px 20px', marginBottom: 14 }}>
+            <motion.div
+              animate={{ scale: breathScale }}
+              transition={{ duration: breathDurations[breathStep], ease: 'easeInOut' }}
+              style={{ width: 140, height: 140, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.03)', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <motion.div
+                animate={{ scale: breathScale }}
+                transition={{ duration: breathDurations[breathStep], ease: 'easeInOut' }}
+                style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+            </motion.div>
+
+            <motion.p
+              key={breathStep}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{ fontSize: 22, fontWeight: 300, color: '#fff', marginTop: 32 }}>
+              {breathLabels[breathStep]}
+            </motion.p>
+            <p style={{ fontSize: 15, ...s.dim, marginTop: 8 }}>
+              {breathDurations[breathStep]} seconds
+            </p>
+          </div>
+
+          <p style={{ fontSize: 14, ...s.dim }}>
+            4-7-8 breathing · {breathCount} {breathCount === 1 ? 'cycle' : 'cycles'} complete
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 8, lineHeight: 1.6 }}>
+            This technique activates your parasympathetic nervous system — the opposite of fight-or-flight.
+            Your heart rate will slow. The craving will soften.
+          </p>
+        </div>
+      )}
+
+      {/* RIDE THE WAVE TIMER */}
+      {phase === 'timer' && (
+        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ ...s.card, padding: '40px 20px', marginBottom: 14 }}>
+            <div style={s.label}>THIS CRAVING WILL PASS IN</div>
+            <div style={{ fontSize: 64, fontWeight: 200, color: '#fff', marginTop: 16, fontVariantNumeric: 'tabular-nums' }}>
+              {fmtTimer(Math.max(0, timerLeft))}
+            </div>
+            {timerLeft <= 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <p style={{ fontSize: 20, color: '#fff', marginTop: 20 }}>You made it.</p>
+                <p style={{ fontSize: 15, ...s.dim, marginTop: 8 }}>The wave passed. You're still standing.</p>
+              </motion.div>
+            )}
+
+            {/* Progress bar */}
+            <div style={{ ...s.track, marginTop: 24 }}>
+              <div style={{ ...s.fill(((900 - timerLeft) / 900) * 100), background: 'rgba(255,255,255,0.15)' }} />
+            </div>
+          </div>
+
+          <p style={{ fontSize: 14, ...s.dim, lineHeight: 1.7 }}>
+            Research shows most cravings peak and pass within 15-20 minutes.
+            Your brain is sending an old signal. You don't have to answer it.
+          </p>
+        </div>
+      )}
+
+      {/* REASONS I QUIT */}
+      {phase === 'reasons' && (
+        <div>
+          <div style={{ ...s.card, marginBottom: 14 }}>
+            <div style={s.label}>YOUR REASONS</div>
+            <p style={{ fontSize: 14, ...s.dim, marginBottom: 14 }}>Why did you choose this? Read them. Feel them.</p>
+
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <input value={newReason} onChange={e => setNewReason(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addReason()}
+                placeholder="Add a reason..." style={{ ...s.input, flex: 1 }} />
+              <button onClick={addReason} style={{ ...s.btnSecondary, padding: '14px 20px', flexShrink: 0 }}>Add</button>
+            </div>
+
+            {reasons.length === 0 && (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <p style={{ fontSize: 14, ...s.dim }}>Add your reasons for quitting</p>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', marginTop: 6 }}>These are your anchors on the hard nights</p>
+              </div>
+            )}
+
+            {reasons.map((r, i) => (
+              <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '14px 0',
+                borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.15)', marginTop: 2 }}>✦</span>
+                <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{r.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {reasons.length >= 3 && (
+            <div style={{ ...s.card, borderLeft: '2px solid rgba(255,255,255,0.15)', borderRadius: '0 16px 16px 0' }}>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>
+                You have {reasons.length} reasons. The craving has zero. You win.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ANCHOR QUOTE */}
+      {phase === 'quote' && (
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div style={{ ...s.card, padding: '40px 24px' }}>
+            <span style={{ fontSize: 32, color: 'rgba(255,255,255,0.1)' }}>✦</span>
+            <p style={{ fontSize: 20, fontWeight: 300, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginTop: 24, fontStyle: 'italic' }}>
+              "{quote}"
+            </p>
+            <p style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', ...s.dim, marginTop: 20 }}>
+              Your higher self
+            </p>
+          </div>
+
+          <div style={{ ...s.card, marginTop: 14, padding: '24px 20px' }}>
+            <p style={{ fontSize: 16, color: '#fff', fontWeight: 500, marginBottom: 10 }}>You are not your craving.</p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>
+              The craving is a signal from your old neural pathways — pathways that are being pruned right now because you stopped feeding them.
+              Every time you resist, those pathways get weaker and your new pathways get stronger.
+              This is literally how rewiring works.
+            </p>
+          </div>
+
+          <div style={{ ...s.card, marginTop: 14, padding: '24px 20px', textAlign: 'left' }}>
+            <div style={s.label}>RIGHT NOW, TRY</div>
+            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8 }}>
+              <p style={{ marginBottom: 10 }}>→ Drink a full glass of cold water</p>
+              <p style={{ marginBottom: 10 }}>→ Step outside for 2 minutes of fresh air</p>
+              <p style={{ marginBottom: 10 }}>→ Put your hands under cold running water</p>
+              <p style={{ marginBottom: 10 }}>→ Text someone you trust</p>
+              <p>→ Do 10 pushups or 20 jumping jacks</p>
+            </div>
+          </div>
         </div>
       )}
     </div>
