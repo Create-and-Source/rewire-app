@@ -253,20 +253,20 @@ const ambient = new Ambient()
 
 const s = {
   page: { maxWidth: 430, margin: '0 auto', padding: '0 16px', minHeight: '100vh' },
-  greeting: { fontSize: 24, fontWeight: 300, color: '#fff', letterSpacing: -0.5 },
-  subtitle: { fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 4 },
-  label: { fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)', marginBottom: 12 },
-  card: { background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '18px 16px' },
-  cardTitle: { fontSize: 14, fontWeight: 500, color: '#fff' },
-  cardText: { fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginTop: 6 },
-  stat: { fontSize: 28, fontWeight: 300, color: '#fff' },
-  statUnit: { fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 2 },
-  pillActive: { borderRadius: 999, padding: '8px 16px', fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' },
-  pill: { borderRadius: 999, padding: '8px 16px', fontSize: 12, fontWeight: 500, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s' },
-  btnPrimary: { width: '100%', padding: '14px 0', borderRadius: 999, background: '#fff', color: '#0D0D0D', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', letterSpacing: 0.5, transition: 'all 0.2s' },
-  btnSecondary: { padding: '10px 20px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 12, fontWeight: 500, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'all 0.2s' },
-  input: { width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 14, outline: 'none', fontFamily: 'Inter' },
-  textarea: { width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 14, outline: 'none', fontFamily: 'Inter', resize: 'none', lineHeight: 1.6 },
+  greeting: { fontSize: 28, fontWeight: 300, color: '#fff', letterSpacing: -0.5 },
+  subtitle: { fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 4 },
+  label: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)', marginBottom: 12 },
+  card: { background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '20px 18px' },
+  cardTitle: { fontSize: 16, fontWeight: 500, color: '#fff' },
+  cardText: { fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginTop: 6 },
+  stat: { fontSize: 32, fontWeight: 300, color: '#fff' },
+  statUnit: { fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.35)', marginTop: 2 },
+  pillActive: { borderRadius: 999, padding: '10px 18px', fontSize: 14, fontWeight: 500, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' },
+  pill: { borderRadius: 999, padding: '10px 18px', fontSize: 14, fontWeight: 500, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s' },
+  btnPrimary: { width: '100%', padding: '16px 0', borderRadius: 999, background: '#fff', color: '#0D0D0D', fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer', letterSpacing: 0.5, transition: 'all 0.2s' },
+  btnSecondary: { padding: '12px 22px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 14, fontWeight: 500, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'all 0.2s' },
+  input: { width: '100%', padding: '16px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 16, outline: 'none', fontFamily: 'Inter' },
+  textarea: { width: '100%', padding: '16px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#fff', fontSize: 16, outline: 'none', fontFamily: 'Inter', resize: 'none', lineHeight: 1.6 },
   dim: { color: 'rgba(255,255,255,0.35)' },
   mid: { color: 'rgba(255,255,255,0.6)' },
   bright: { color: '#fff' },
@@ -275,7 +275,7 @@ const s = {
   nav: { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(13,13,13,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.06)' },
   navInner: { maxWidth: 430, margin: '0 auto', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '8px 0 max(8px, env(safe-area-inset-bottom))' },
   navItem: (active) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', opacity: active ? 1 : 0.35, transition: 'all 0.2s', padding: '4px 8px' }),
-  navLabel: { fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: '#fff' },
+  navLabel: { fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: '#fff' },
   quoteBar: { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(13,13,13,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' },
   quoteInner: { maxWidth: 430, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8 },
   quoteText: { fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.35)', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
@@ -516,6 +516,11 @@ function HomePage({ time, quote, setPage }) {
   const today = new Date().toDateString()
   const [cravingLog, cravingDb] = useSync('craving_log', 'craving_log')
   const [justResisted, setJustResisted] = useState(false)
+  const [tasks, tasksDb] = useSync('tasks', 'tasks')
+  const [taskInput, setTaskInput] = useState('')
+  const activeTasks = tasks.filter(t => !t.done)
+  const addHomeTask = () => { if (!taskInput.trim()) return; tasksDb.add({ text: taskInput.trim(), done: false }); setTaskInput('') }
+  const toggleHomeTask = (id) => { const t = tasks.find(x => x.id === id); if (t) tasksDb.update(id, { done: !t.done, completed_at: !t.done ? new Date().toISOString() : null }) }
 
   const cravings = cravingLog.filter(e => new Date(e.created_at || e.date).toDateString() === today).length
   const totalResisted = cravingLog.length
@@ -582,6 +587,31 @@ function HomePage({ time, quote, setPage }) {
             <div style={{ fontSize: 9, ...s.dim, textTransform: 'uppercase', letterSpacing: 1 }}>All Time</div>
           </div>
         </div>
+      </div>
+
+      {/* Tasks widget */}
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={s.label}>TODAY'S TASKS</div>
+          <button onClick={() => setPage('tasks')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: 0.5 }}>See all →</button>
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <input value={taskInput} onChange={e => setTaskInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addHomeTask()}
+            placeholder="Add a task..." style={{ ...s.input, padding: '12px 14px', fontSize: 14 }} />
+          <button onClick={addHomeTask} style={{ ...s.btnSecondary, padding: '12px 16px', fontSize: 13, flexShrink: 0 }}>+</button>
+        </div>
+        {activeTasks.length === 0 && <p style={{ fontSize: 13, ...s.dim, textAlign: 'center', padding: '8px 0' }}>All clear — you're on top of it</p>}
+        {activeTasks.slice(0, 5).map(t => (
+          <button key={t.id} onClick={() => toggleHomeTask(t.id)}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <span style={{ width: 20, height: 20, borderRadius: 6, border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {t.done && <span style={{ color: '#fff', fontSize: 11 }}>✓</span>}
+            </span>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{t.text}</span>
+          </button>
+        ))}
+        {activeTasks.length > 5 && <p style={{ fontSize: 12, ...s.dim, marginTop: 8 }}>+{activeTasks.length - 5} more</p>}
       </div>
 
       {/* Milestone — just the current one, subtle */}
